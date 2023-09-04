@@ -1,6 +1,5 @@
 <template>
-  <div>chapter</div>
+  <div>students</div>
 </template>
 <script setup>
-
 </script>

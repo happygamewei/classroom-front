@@ -7,6 +7,19 @@
   </div>
 </template>
 <script setup>
+import axios from "../utils/request.js";
+import {onMounted} from "vue";
+
+onMounted(() => {
+  getInfo()
+})
+
+
+const getInfo = () => {
+  axios.get("/classroom/course/1").then((res) => {
+    console.log(res)
+  })
+}
 
 </script>
 <style>
