@@ -3,12 +3,12 @@
     <Header />
     <div class="class_header">
       <div class="header_up">
-        <h1 class="course_name">计算机导论</h1>
-        <h2 class="course_class">软件工程</h2>
+        <h1 class="course_name">{{courseInfo.name}}</h1>
+        <h2 class="course_class">{{courseInfo.teachClass}}</h2>
         <div class="course_msg">
-          <span> 加课码LDJWX7&nbsp;&nbsp; </span>
-          <span> 已有2人加入&nbsp;&nbsp; </span>
-          <span> 10 学时数&nbsp;&nbsp; </span>
+          <span> 加课码 {{courseInfo.code}}&nbsp;&nbsp; </span>
+          <span> 已有{{courseInfo.joinNumber}}人加入&nbsp;&nbsp; </span>
+          <span> {{courseInfo.creditHours}} 学时数&nbsp;&nbsp; </span>
         </div>
       </div>
       <div class="header_down">
@@ -35,11 +35,21 @@ import Header from "../components/Header.vue";
 import CourseTeaching from './course_teaching/index.vue'
 import StudentAnalysis from './study_analysis/index.vue'
 import axios from "../utils/request.js";
-import {onMounted} from "vue";
+import { useRoute } from 'vue-router';
+import {getOneCourse} from "../api/course.js";
 
-onMounted(() => {
-  getInfo()
-})
+const route = useRoute();
+
+const courseId = route.query.courseId
+
+const courseInfo = ref(null)
+
+// 得到数据
+if(courseId !== undefined){
+  getOneCourse(courseId).then((res) => {
+    courseInfo.value = res
+  })
+}
 
 const active = ref(1)
 
@@ -65,17 +75,6 @@ const handleMenuClick = (item) => {
   // 根据点击的菜单项的 key 来切换 active 的值
   active.value = parseInt(item.key);
 };
-
-// 得到数据
-const courseInfo = ref(null)
-const getInfo = () => {
-  axios.get("/classroom/course/1").then((res) => {
-    if(res.code === 200){
-      courseInfo.value = res.data
-      console.log(courseInfo.value)
-    }
-  })
-}
 
 </script>
 <style>

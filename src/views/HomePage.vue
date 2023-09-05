@@ -8,17 +8,17 @@
           <a-button type="primary" size="large" style="border-radius: 5px">+ 创建/加入课程</a-button>
         </div>
       </div>
-      <div class="card">
-        <div class="card_up" @click="toClassDetail">
-          <span class="year_class">2022-2023 </span>
-          <span style="font-size: 13px;"> 全年</span>
-          <div class="card_name">计算机导论</div>
-          <div class="card_classes">软件工程</div>
+      <div class="card" v-for="item in courseList" :key="item.courseId">
+        <div class="card_up" @click="toClassDetail(item.courseId)">
+          <span class="year_class">{{item.schoolYear}}</span>
+          <span style="font-size: 13px;">{{ " " + item.term}}</span>
+          <div class="card_name">{{item.name}}</div>
+          <div class="card_classes">{{item.teachClass}}</div>
 
           <div style="margin-left: 2vw; margin-top: 2vh">
             <a-dropdown>
               <a class="ant-dropdown-link" @click.prevent>
-                加课码: LDJXW7
+                加课码: {{item.code}}
                 <DownOutlined />
               </a>
               <template #overlay>
@@ -37,7 +37,7 @@
         <div class="card_down">
           <div style="margin-left: 1vw; margin-top: 6vh; font-size: 14px">
             <div class="mode_class">教&nbsp;</div>
-            <div style="display: inline-block">&nbsp;成员 2 人</div>
+            <div style="display: inline-block">&nbsp;成员 {{item.joinNumber}} 人</div>
             <div style="display: inline-block; margin-left: 5vw">取消置顶</div>
           </div>
         </div>
@@ -50,16 +50,29 @@
   </div>
 </template>
 <script setup>
+import { ref } from 'vue';
 import { DownOutlined } from '@ant-design/icons-vue';
 import Header from "../components/Header.vue";
 import { useRouter } from 'vue-router';
+import {onMounted} from "vue";
+import {getAllCourse} from "../api/course.js";
+
+const courseList = ref()
+
+onMounted(() => {
+  getAllCourse().then((res) => {
+    courseList.value = res
+  })
+
+})
 
 const router = useRouter();
 
 //跳转到课程详细页面
-const toClassDetail = () => {
+const toClassDetail = (courseId) => {
   router.push({
-    name: 'ClassDetail'
+    name: 'ClassDetail',
+    query: {courseId}
   });
 }
 </script>
@@ -73,8 +86,8 @@ const toClassDetail = () => {
   border-radius: 10px;
 }
 .card{
-  width: 19vw;
-  height: 34vh;
+  width: 18vw;
+  height: 33vh;
   margin-top: 5vh;
   margin-left: 2vw;
   margin-bottom: 5vh;
