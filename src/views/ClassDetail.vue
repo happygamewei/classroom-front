@@ -30,13 +30,14 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive } from 'vue';
+import {ref, reactive, onMounted} from 'vue';
 import Header from "../components/Header.vue";
 import CourseTeaching from './course_teaching/index.vue'
 import StudentAnalysis from './study_analysis/index.vue'
 import axios from "../utils/request.js";
 import { useRoute } from 'vue-router';
 import {getOneCourse} from "../api/course.js";
+import {getChapterByCourse} from "../api/chapter.js";
 
 const route = useRoute();
 
@@ -44,10 +45,17 @@ const courseId = route.query.courseId
 
 const courseInfo = ref(null)
 
+onMounted(() => {
+  if(courseId != null){
+    // getChapterByCourseInfo(courseId)
+  }
+})
+
 // 得到数据
 if(courseId !== undefined){
   getOneCourse(courseId).then((res) => {
     courseInfo.value = res
+    // console.log(courseInfo.value)
   })
 }
 
@@ -75,6 +83,13 @@ const handleMenuClick = (item) => {
   // 根据点击的菜单项的 key 来切换 active 的值
   active.value = parseInt(item.key);
 };
+
+// 获取章节信息
+const getChapterByCourseInfo = (courseId) => {
+  getChapterByCourse(courseId).then((res) => {
+    console.log(res)
+  })
+}
 
 </script>
 <style>
