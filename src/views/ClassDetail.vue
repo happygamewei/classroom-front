@@ -3,12 +3,12 @@
     <Header />
     <div class="class_header">
       <div class="header_up">
-        <h1 class="course_name">{{courseInfo.name}}</h1>
-        <h2 class="course_class">{{courseInfo.teachClass}}</h2>
+        <h1 class="course_name">{{courseInfo ? courseInfo.name : ''}}</h1>
+        <h2 class="course_class">{{courseInfo ? courseInfo.teachClass : ''}}</h2>
         <div class="course_msg">
-          <span> 加课码 {{courseInfo.code}}&nbsp;&nbsp; </span>
-          <span> 已有{{courseInfo.joinNumber}}人加入&nbsp;&nbsp; </span>
-          <span> {{courseInfo.creditHours}} 学时数&nbsp;&nbsp; </span>
+          <span> 加课码 {{courseInfo ? courseInfo.code : ''}}&nbsp;&nbsp; </span>
+          <span> 已有{{courseInfo ? courseInfo.joinNumber : ''}}人加入&nbsp;&nbsp; </span>
+          <span> {{courseInfo ? courseInfo.creditHours : ''}} 学时数&nbsp;&nbsp; </span>
         </div>
       </div>
       <div class="header_down">
@@ -38,6 +38,7 @@ import axios from "../utils/request.js";
 import { useRoute } from 'vue-router';
 import {getOneCourse} from "../api/course.js";
 import {getChapterByCourse} from "../api/chapter.js";
+import {userCourseId} from "../store/index.js";
 
 const route = useRoute();
 
@@ -45,11 +46,7 @@ const courseId = route.query.courseId
 
 const courseInfo = ref(null)
 
-onMounted(() => {
-  if(courseId != null){
-    // getChapterByCourseInfo(courseId)
-  }
-})
+const toCourseId = userCourseId()
 
 // 得到数据
 if(courseId !== undefined){
@@ -57,6 +54,7 @@ if(courseId !== undefined){
     courseInfo.value = res
     // console.log(courseInfo.value)
   })
+  toCourseId.setCourseId(courseId)
 }
 
 const active = ref(1)
@@ -83,13 +81,6 @@ const handleMenuClick = (item) => {
   // 根据点击的菜单项的 key 来切换 active 的值
   active.value = parseInt(item.key);
 };
-
-// 获取章节信息
-const getChapterByCourseInfo = (courseId) => {
-  getChapterByCourse(courseId).then((res) => {
-    console.log(res)
-  })
-}
 
 </script>
 <style>

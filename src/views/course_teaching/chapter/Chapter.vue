@@ -8,69 +8,134 @@
       <a-progress class="progress" :percent="30" size="small" />
       <div style="float: right;">
         <el-button type="primary" plain size="large">编辑排序</el-button>
-        <el-button type="primary" size="large">+ 添加章节</el-button>
+        <el-button type="primary" size="large" @click="showModal">+ 添加章节</el-button>
         <el-button type="success" size="large">+ 添加内容</el-button>
       </div>
-    </div>
-    <div class="chapter_down">
-      <div class="chapter_number">第一章</div>
-      <div class="active_number">8个活动</div>
-      <a-tag color="#74787C" style="margin-left: 1vw">混合</a-tag>
-      <a-tag color="blue">3学时</a-tag>
     </div>
     <div>
       <a-tree
           class="tree_plan"
           :tree-data="treeData"
       >
-        <template #title="{ title, key }">
-          <div v-if="key === '0-0'" style="font-size: 1.5rem;" >
-            {{ title }}
-          </div>
+        <template #title="{ name, parentId, teachMode, creditHours }">
+          <div class="tree_class">
+            <div class="expand_tree">
+              <div v-if="parentId === 0" style="font-size: 1.2rem;" >
+                {{ name }}
+              </div>
+              <div v-else>{{ name }}</div>
 
-          <div v-else>{{ title }}</div>
-          <div style="float: left">8个活动</div>
-          <!--          <template>{{ title }}</template>-->
-          <!--          <span>{{title}}</span>-->
+              <div style="margin-left: 1vw">8个活动</div>
+              <a-tag color="#74787C" style="margin-left: 1vw" v-if="teachMode === '3'">混合</a-tag>
+              <a-tag color="#74787C" style="margin-left: 1vw" v-if="teachMode === '2'">线下</a-tag>
+              <a-tag color="#74787C" style="margin-left: 1vw" v-if="teachMode === '1'">线上</a-tag>
+              <a-tag color="blue">{{creditHours}}学时</a-tag>
+            </div>
+
+            <div style="margin-left: 50vw; display: flex; align-items: center;">
+              <div v-if="parentId === 0">
+                <div>
+                  <PlusOutlined />
+                </div>
+                <div style="margin-top: -0.5vh">
+                  添加小节
+                </div>
+              </div>
+              <div style="margin-left: 2.5vw;" >
+                <div>
+                  <EllipsisOutlined style="font-size: 1.3rem" />
+                </div>
+                <div style="margin-top: -1vh">
+                  更多
+                </div>
+              </div>
+            </div>
+          </div>
         </template>
       </a-tree>
+    </div>
+
+    <!--添加章节-->
+    <div>
+      <a-modal v-model:open="openAdd" title="创建课程" @ok="handleOk" width="50vw" cancelText="取消" okText="确定">
+        <div style="margin-top: 3vh">
+          <a-form :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol">
+            <a-form-item label="章节名称" :rules="[{ required: true, message: '请输入章节名称' }]">
+              <a-input size="large" style="width: 30vw" placeholder="请输入章节名称" v-model:value="formState.name" />
+            </a-form-item>
+            <a-form-item label="授课模式">
+              <a-radio-group v-model:value="formState.resource">
+                <a-radio value="1">线上</a-radio>
+                <a-radio value="2">线下</a-radio>
+                <a-radio value="3">混合</a-radio>
+              </a-radio-group>
+            </a-form-item>
+            <a-form-item label="学时数">
+              <a-input size="large" style="width: 30vw" placeholder="请输入学时，不填写默认为不设置" v-model:checked="formState.delivery" />
+            </a-form-item>
+            <div class="illustration">
+              说明：新建章节将出现在已建章节的下方，按建立顺序排序
+            </div>
+          </a-form>
+        </div>
+      </a-modal>
     </div>
   </div>
 </template>
 <script setup>
-import { ref, watch } from 'vue';
-const treeData = [
-  {
-    title: 'parent 1',
-    key: '0-0',
-    children: [
-      {
-        title: 'parent 1-0',
-        key: '0-0-0',
-        children: [
-          {
-            title: 'leaf',
-            key: '0-0-0-0',
-          },
-          {
-            title: 'leaf',
-            key: '0-0-0-1',
-          },
-        ],
-      },
-      {
-        title: 'parent 1-1',
-        key: '0-0-1',
-        children: [
-          {
-            key: '0-0-1-0',
-            title: 'sss',
-          },
-        ],
-      },
-    ],
+import {onMounted, reactive, ref, toRaw, watch} from 'vue';
+import {getChapterByCourse} from "../../../api/chapter.js";
+import {userCourseId} from "../../../store/index.js";
+import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons-vue';
+
+const toCourseId = userCourseId()
+
+const chapterList = ref(null)
+
+const treeData = ref([])
+
+onMounted(() => {
+  const id =  toCourseId.getCourseId()
+  getChapterByCourseInfo(id)
+})
+
+// 获取章节信息
+const getChapterByCourseInfo = (courseId) => {
+  getChapterByCourse(courseId).then((res) => {
+    chapterList.value = res
+    treeData.value = res
+    console.log(chapterList.value)
+  })
+}
+
+// 创建章节
+const openAdd = ref(false);
+const showModal = () => {
+  openAdd.value = true;
+};
+const handleOk = e => {
+  console.log(e);
+  openAdd.value = false;
+};
+
+const formState = reactive({
+  name: '',
+  delivery: false,
+  type: [],
+  resource: '',
+  desc: '',
+});
+const onSubmit = () => {
+  console.log('submit!', toRaw(formState));
+};
+const labelCol = {
+  style: {
+    width: '150px',
   },
-];
+};
+const wrapperCol = {
+  span: 14,
+};
 
 </script>
 <style>
@@ -105,29 +170,48 @@ const treeData = [
   margin-top: 1vh;
 }
 
-.chapter_down{
-  margin-bottom: 5vh;
-  height: 8vh;
-  border-radius: 7px;
-  display: flex;
-  align-items: center;
-  background-color: #EEEEEE;
-}
-.chapter_number{
-  float: left;
-  margin-left: 2vw;
-  font-size: 1.1rem;
-}
-.active_number{
-  float: left;
-  margin-left: 1vw;
-}
-
 .tree_plan{
   padding-left: 1vw;
-  padding-top: 1vh;
-  padding-bottom: 1vh;
   width: 80vw;
   background-color: #EEEEEE;
+}
+
+.tree_plan .ant-tree-treenode-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  margin: 0;
+}
+
+.tree_plan .ant-tree-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  width: auto;
+  height: auto;
+  margin: 0;
+}
+.tree_class{
+  display: flex;
+  align-items: center;
+  height: 7vh;
+}
+.tree_class:hover,
+.tree_class.active {
+  background-color: #EEEEEE !important; /* 修改鼠标悬停和点击时的背景颜色 */
+}
+.expand_tree{
+  display: flex;
+  align-items: center;
+  margin-left: 0.5vw;
+}
+
+
+.illustration{
+  margin-left: 5.5vw;
+  margin-bottom: 3vh;
+  color: #888888;
 }
 </style>

@@ -31,6 +31,8 @@ import Resource from "./resource/Resource.vue";
 import Notice from "./notice/Notice.vue";
 import Topic from "./topic/Topic.vue";
 
+defineProps(['theCourseId'])
+
 const activeKey = ref('1');
 </script>
 <style>
