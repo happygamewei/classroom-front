@@ -7,5 +7,10 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     port: '8010'
+  },
+  resolve: {
+    alias: {
+      '@': '/src', // 设置 @ 别名为 src 目录的路径
+    },
   }
 })

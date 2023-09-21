@@ -6,7 +6,7 @@
         <div class="top_class">置顶课程</div>
         <div class="create_class">
           <a-dropdown :trigger="['click']">
-            <a-button type="primary" size="large" style="border-radius: 5px" @click.prevent>+ 创建/加入课程</a-button>
+            <a-button type="primary" size="large" style="border-radius: 5px" @click.prevent><PlusOutlined />&nbsp; 创建/加入课程</a-button>
             <template #overlay>
               <a-menu style="width: 7vw; margin-left: 2vw">
                 <a-menu-item key="0">
@@ -50,7 +50,25 @@
           <div style="margin-left: 1vw; margin-top: 6vh; font-size: 14px">
             <a-tag class="mode_class" color="#108ee9">教</a-tag>
             <div style="display: inline-block">&nbsp;成员 {{item.joinNumber}} 人</div>
-            <div style="display: inline-block; margin-left: 5vw">取消置顶</div>
+            <div style="display: inline-block; margin-left: 4vw">取消置顶</div>
+            <div class="other_info">
+              <a-dropdown :trigger="['click']">
+                <EllipsisOutlined style="font-size: 1.3rem" />
+                <template #overlay>
+                  <a-menu style="width: 7vw; margin-left: -3vw">
+                    <a-menu-item key="0">
+                      <a>结课</a>
+                    </a-menu-item>
+                    <a-menu-item key="1">
+                      <a href="">删除</a>
+                    </a-menu-item>
+                    <a-menu-item key="2">
+                      <a href="">编辑</a>
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </div>
           </div>
         </div>
       </div>
@@ -101,15 +119,11 @@
               </a-col>
             </a-row>
 
-            <a-form-item label="Activity form">
+            <a-form-item label="课程介绍">
               <a-textarea v-model:value="formState.desc" />
             </a-form-item>
             <a-form-item label="授课模式">
               <a-input v-model:checked="formState.delivery" />
-            </a-form-item>
-            <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-              <a-button type="primary" @click="onSubmit">Create</a-button>
-              <a-button style="margin-left: 10px">Cancel</a-button>
             </a-form-item>
           </a-form>
         </div>
@@ -120,7 +134,7 @@
 </template>
 <script setup>
 import { ref, reactive, toRaw } from 'vue';
-import { DownOutlined } from '@ant-design/icons-vue';
+import {DownOutlined, EllipsisOutlined, PlusOutlined} from '@ant-design/icons-vue';
 import Header from "../components/Header.vue";
 import { useRouter } from 'vue-router';
 import {onMounted} from "vue";
@@ -240,5 +254,11 @@ const wrapperCol = {
   float: right;
   margin-top: 2vh;
   margin-right: 3vw;
+}
+.other_info{
+  display: inline-block;
+  margin-left: 1vw;
+  vertical-align: middle;
+  cursor: pointer;
 }
 </style>

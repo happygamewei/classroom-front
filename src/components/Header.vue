@@ -1,12 +1,18 @@
 <template>
   <div class="all_header">
-    <div class="login_btn">
+    <div class="login_btn" @click="toLogin">
       登录
     </div>
   </div>
 </template>
 <script setup>
 
+import {useRouter} from "vue-router";
+
+const router = useRouter();
+const toLogin = () => {
+  router.push({name: 'Login'})
+}
 </script>
 <style>
 .all_header{
