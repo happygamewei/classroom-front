@@ -2,9 +2,11 @@ import {createRouter, createWebHistory} from 'vue-router'
 
 import HomePage from "../views/HomePage.vue";
 import ClassDetail from "../views/ClassDetail.vue";
-import Login from "@/views/login.vue";
-
+import NoticeDetail from "../views/course_teaching/notice/NoticeDetail.vue";
+import NoticeDialog from "../views/course_teaching/notice/NoticeDialog.vue";
+import Login from "../views/login.vue"
 const routes = [
+
     {
         path: '/',
         name: 'HomePage',
@@ -16,8 +18,19 @@ const routes = [
         component: ClassDetail
     },
     {
+        path: '/noticeDetail',
+        name: 'NoticeDetail',
+        component: NoticeDetail
+    },{
+
+        path: '/noticeDialog',
+        name: 'NoticeDialog',
+        component: NoticeDialog
+
+    },
+    {
         path: '/login',
-        name: 'Login',
+        name:'Login',
         component: Login
     }
 ]
