@@ -4,6 +4,8 @@ import HomePage from "../views/HomePage.vue";
 import ClassDetail from "../views/ClassDetail.vue";
 import TopicDetail from "../views/course_teaching/topic/TopicDetail.vue";
 import Login from "@/views/login.vue";
+import AddTest from "../views/course_teaching/test/AddTest.vue";
+import TestContent from "../views/course_teaching/test/TestContent.vue"
 
 
 import NoticeDetail from "../views/course_teaching/notice/NoticeDetail.vue";
@@ -59,6 +61,15 @@ const routes = [
         meta: {
             title: '课程设置'
         }
+    },
+    {
+        path:'/addtest',
+        name:'AddTest',
+        component: AddTest
+    },{
+        path:'/testContent',
+        name:'TestContent',
+        component: TestContent
     }
 
 ]
