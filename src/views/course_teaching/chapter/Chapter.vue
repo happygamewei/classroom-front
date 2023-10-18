@@ -26,6 +26,9 @@
         size="small"
       />
       <div style="float: right">
+      <div class="credit">已分配学时 {{courseAll ? courseAll.allocatedHours + '/' + courseAll.creditHours : ''}} </div>
+      <a-progress class="progress" :percent="courseAll ? courseAll.allocatedHours / courseAll.creditHours * 100 : 0" size="small" />
+      <div style="float: right;" v-if="!isStudent">
         <el-button type="primary" plain size="large">编辑排序</el-button>
         <el-button type="primary" size="large" @click="addChapter"
           ><PlusOutlined />&nbsp; 添加章节</el-button
@@ -118,6 +121,40 @@
               </div>
             </div>
           </div>
+              <div style="margin-left: 50vw; display: flex; align-items: center;" v-if="!isStudent">
+                <div v-if="item.parentId === 0" @click="addSubsection(item.chapterId)">
+                  <div>
+                    <PlusOutlined />
+                  </div>
+                  <div style="margin-top: -0.5vh">
+                    添加小节
+                  </div>
+                </div>
+                <div style="margin-left: 2.5vw;">
+                  <a-dropdown :trigger="['click']">
+                    <div>
+                      <div>
+                        <EllipsisOutlined style="font-size: 1.3rem" />
+                      </div>
+                      <div style="margin-top: -1vh">
+                        更多
+                      </div>
+                    </div>
+                    <template #overlay>
+                      <a-menu style="width: 5vw; margin-left: -1vw">
+                        <a-menu-item key="0">
+                          <a @click="editChapter(item.chapterId, item.name, item.parentId, item.teachMode, item.creditHours)">编辑</a>
+                        </a-menu-item>
+                        <a-menu-item key="1">
+                          <a href="">删除</a>
+                        </a-menu-item>
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
+                </div>
+              </div>
+            </div>
+
         </template>
       </a-tree>
     </div>
@@ -246,6 +283,15 @@ import { ElMessage } from "element-plus";
 import HomeContent from "@/components/HomeContent.vue";
 import TestContent from "@/components/TestContent.vue";
 import { HOMEWORK_CONTENT, TEST_CONTENT } from "@/config/setting.js";
+import {onMounted, reactive, ref, toRaw, watch} from 'vue';
+import {addChapterInfo, getChapterByCourse, getCourseContentInfo, updateChapterInfo} from "../../../api/chapter.js";
+import {userCourseId} from "../../../store/index.js";
+import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import {ElMessage} from "element-plus";
+import HomeContent from "@/components/chapter/HomeContent.vue";
+import TestContent from "@/components/chapter/TestContent.vue";
+import {ADMIN, COMMON, HOMEWORK_CONTENT, TEST_CONTENT} from "@/config/setting.js";
+import {getRoles} from "@/utils/user-utils.js";
 
 const toCourseId = userCourseId();
 
@@ -259,11 +305,23 @@ const courseAll = ref(null);
 
 const id = ref();
 
+const isStudent = ref(true)
+
 onMounted(() => {
   id.value = toCourseId.getCourseId();
   getInfo();
   formState.courseId = id.value;
 });
+  const roles = getRoles()
+  if(roles.includes(ADMIN)){
+    isStudent.value = false
+  }else if (roles.includes(COMMON)){
+    isStudent.value = true
+  }
+  id.value =  toCourseId.getCourseId()
+  getInfo()
+  formState.courseId = id.value
+})
 
 const getInfo = () => {
   getChapterByCourseInfo(id.value);
@@ -365,7 +423,32 @@ const handleOk = (e) => {
       ElMessage.success(res);
       getInfo();
     });
+const handleOk = e => {
+  if(formState.name != ''){
+    openAdd.value = false;
+    if(modalTitle.value === '添加章节'){
+      formState.parentId = 0
+      addChapterInfo(formState).then((res) => {
+        ElMessage.success(res)
+        getInfo()
+      })
+    }
+    if(modalTitle.value === '添加小节'){
+      addChapterInfo(formState).then((res) => {
+        ElMessage.success(res)
+        getInfo()
+      })
+    }
+    if(modalTitle.value === '编辑章节' || modalTitle.value === '编辑小节'){
+      updateChapterInfo(formState).then((res) => {
+        ElMessage.success(res?.msg)
+        getInfo()
+      })
+    }
+  }else {
+    ElMessage.error("名称为空，必须添写")
   }
+
 };
 
 const expandedSubContent = ref([]); // 用于存储子内容的展开状态
@@ -390,6 +473,7 @@ const toggleSubContent = (item) => {
 const onSubmit = () => {
   console.log("submit!", toRaw(formState));
 };
+
 const labelCol = {
   style: {
     width: "10vw",

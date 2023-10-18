@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a-tabs v-model:activeKey="activeKey">
+    <a-tabs v-model:activeKey="activeKey" size="large">
       <a-tab-pane key="1" tab="目录">
         <Chapter />
       </a-tab-pane>
