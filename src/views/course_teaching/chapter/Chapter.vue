@@ -6,7 +6,7 @@
       <a-divider class="divider" type="vertical" />
       <div class="credit">已分配学时 {{courseAll ? courseAll.allocatedHours + '/' + courseAll.creditHours : ''}} </div>
       <a-progress class="progress" :percent="courseAll ? courseAll.allocatedHours / courseAll.creditHours * 100 : 0" size="small" />
-      <div style="float: right;">
+      <div style="float: right;" v-if="!isStudent">
         <el-button type="primary" plain size="large">编辑排序</el-button>
         <el-button type="primary" size="large" @click="addChapter"><PlusOutlined />&nbsp; 添加章节</el-button>
         <el-button type="success" size="large" @click="dialogVisible = true"><PlusOutlined />&nbsp; 添加内容</el-button>
@@ -41,7 +41,7 @@
                 <a-tag color="blue">{{item.creditHours}}学时</a-tag>
               </div>
 
-              <div style="margin-left: 50vw; display: flex; align-items: center;">
+              <div style="margin-left: 50vw; display: flex; align-items: center;" v-if="!isStudent">
                 <div v-if="item.parentId === 0" @click="addSubsection(item.chapterId)">
                   <div>
                     <PlusOutlined />
@@ -50,7 +50,7 @@
                     添加小节
                   </div>
                 </div>
-                <div style="margin-left: 2.5vw;" >
+                <div style="margin-left: 2.5vw;">
                   <a-dropdown :trigger="['click']">
                     <div>
                       <div>
@@ -146,9 +146,10 @@ import {addChapterInfo, getChapterByCourse, getCourseContentInfo, updateChapterI
 import {userCourseId} from "../../../store/index.js";
 import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import {ElMessage} from "element-plus";
-import HomeContent from "@/components/HomeContent.vue";
-import TestContent from "@/components/TestContent.vue";
-import {HOMEWORK_CONTENT, TEST_CONTENT} from "@/config/setting.js";
+import HomeContent from "@/components/chapter/HomeContent.vue";
+import TestContent from "@/components/chapter/TestContent.vue";
+import {ADMIN, COMMON, HOMEWORK_CONTENT, TEST_CONTENT} from "@/config/setting.js";
+import {getRoles} from "@/utils/user-utils.js";
 
 const toCourseId = userCourseId()
 
@@ -162,7 +163,15 @@ const courseAll = ref(null)
 
 const id = ref()
 
+const isStudent = ref(true)
+
 onMounted(() => {
+  const roles = getRoles()
+  if(roles.includes(ADMIN)){
+    isStudent.value = false
+  }else if (roles.includes(COMMON)){
+    isStudent.value = true
+  }
   id.value =  toCourseId.getCourseId()
   getInfo()
   formState.courseId = id.value
@@ -249,26 +258,31 @@ const addSubsection = (courseId) => {
 
 // 提交
 const handleOk = e => {
-  openAdd.value = false;
-  if(modalTitle.value === '添加章节'){
-    formState.parentId = 0
-    addChapterInfo(formState).then((res) => {
-      ElMessage.success(res)
-      getInfo()
-    })
+  if(formState.name != ''){
+    openAdd.value = false;
+    if(modalTitle.value === '添加章节'){
+      formState.parentId = 0
+      addChapterInfo(formState).then((res) => {
+        ElMessage.success(res)
+        getInfo()
+      })
+    }
+    if(modalTitle.value === '添加小节'){
+      addChapterInfo(formState).then((res) => {
+        ElMessage.success(res)
+        getInfo()
+      })
+    }
+    if(modalTitle.value === '编辑章节' || modalTitle.value === '编辑小节'){
+      updateChapterInfo(formState).then((res) => {
+        ElMessage.success(res?.msg)
+        getInfo()
+      })
+    }
+  }else {
+    ElMessage.error("名称为空，必须添写")
   }
-  if(modalTitle.value === '添加小节'){
-    addChapterInfo(formState).then((res) => {
-      ElMessage.success(res)
-      getInfo()
-    })
-  }
-  if(modalTitle.value === '编辑章节' || modalTitle.value === '编辑小节'){
-    updateChapterInfo(formState).then((res) => {
-      ElMessage.success(res)
-      getInfo()
-    })
-  }
+
 };
 
 const expandedSubContent = ref([]); // 用于存储子内容的展开状态
@@ -288,10 +302,6 @@ const toggleSubContent = (item) => {
   }
 };
 
-
-const onSubmit = () => {
-  console.log('submit!', toRaw(formState));
-};
 const labelCol = {
   style: {
     width: '10vw',

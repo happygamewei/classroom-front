@@ -4,6 +4,14 @@ export const APP_BASE_API = import.meta.env. VITE_APP_BASE_API
 export const TOKEN_HEADER_NAME = 'Authorization';
 // token存储的名称
 export const TOKEN_STORE_NAME = 'Admin-Token';
+// userId
+export const USER_ID = 'userId';
+// roles
+export const ROLES = 'roles';
+// 角色admin
+export const ADMIN = 'admin'
+// 角色common
+export const COMMON = 'common'
 
 // 章节-作业内容
 export const HOMEWORK_CONTENT = "1";

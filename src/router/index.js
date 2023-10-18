@@ -8,17 +8,34 @@ const routes = [
     {
         path: '/',
         name: 'HomePage',
-        component: HomePage
+        component: () => import("../views/HomePage.vue"),
+        meta: {
+            title: '我的课堂'
+        }
     },
     {
         path: '/classDetail',
         name: 'ClassDetail',
-        component: ClassDetail
+        component: () => import("../views/ClassDetail.vue"),
+        meta: {
+            title: '课程内容'
+        }
     },
     {
         path: '/login',
         name: 'Login',
-        component: Login
+        component: Login,
+        meta: {
+            title: '登录'
+        }
+    },
+    {
+        path: '/classSetting',
+        name: 'ClassSetting',
+        component: () => import("../views/ClassSetting.vue"),
+        meta: {
+            title: '课程设置'
+        }
     }
 ]
 
