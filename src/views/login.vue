@@ -1,82 +1,48 @@
 <template>
-  <div class="login_class">
-    <a-form
-        :model="formState"
-        name="basic"
-        :label-col="{ span: 8 }"
-        :wrapper-col="{ span: 16 }"
-        autocomplete="off"
-        @finish="onFinish"
-        @finishFailed="onFinishFailed"
-    >
-      <a-form-item
-          label="账户"
-          name="username"
-          :rules="[{ required: true, message: '请输入账户!' }]"
-      >
-        <a-input v-model:value="formState.username" />
-      </a-form-item>
-
-      <a-form-item
-          label="密码"
-          name="password"
-          :rules="[{ required: true, message: '请输入密码!' }]"
-      >
-        <a-input-password v-model:value="formState.password" />
-      </a-form-item>
-
-      <a-form-item name="remember" :wrapper-col="{ offset: 0, span: 16 }">
-        <a-checkbox v-model:checked="formState.remember">记住我</a-checkbox>
-      </a-form-item>
-
-      <a-form-item :wrapper-col="{ offset: 16, span: 16 }">
-        <a-button type="primary" html-type="submit" @click="submitLogin">登录</a-button>
-      </a-form-item>
-    </a-form>
+  <div class="login_back">
+    <div class="all_login">
+      <h2>账号登录</h2>
+      <a-tabs v-model:activeKey="activeKey" centered size="large" :tabBarGutter=60>
+        <a-tab-pane key="1" tab="账户登录">
+          <UsernameLogin />
+        </a-tab-pane>
+        <a-tab-pane key="2" tab="手机短信登录" force-render>
+          <PhoneLogin />
+        </a-tab-pane>
+        <a-tab-pane key="3" tab="微信登录">Content of Tab Pane 3</a-tab-pane>
+      </a-tabs>
+      <div style="margin-left: 16vw">还没账号? <a>去注册</a></div>
+    </div>
   </div>
 </template>
 <script setup>
-import {onMounted, reactive} from 'vue';
-import {getCodeImg, getInfo, login} from "@/api/login.js";
-import {setToken} from "@/utils/token-utils.js";
-import {ElMessage} from "element-plus";
-import {useRouter} from "vue-router";
+import { ref } from 'vue';
+import UsernameLogin from "@/views/loginVue/UsernameLogin.vue";
+import PhoneLogin from "@/views/loginVue/PhoneLogin.vue";
 
-const formState = reactive({
-  username: '',
-  password: '',
-  code: 'login-front',
-  uuid: '',
-  remember: true,
-});
-const onFinish = values => {
-};
-const onFinishFailed = errorInfo => {
-};
-
-onMounted(() => {
-  getCodeImg().then(res => {
-    formState.uuid = res
-  })
-})
-
-const router = useRouter();
-
-//登录操作
-const submitLogin = () => {
-  login(formState).then(res => {
-    setToken(res.token, formState.remember)
-    getInfo().then(res => {
-      console.log(res)
-      ElMessage.success(res?.msg)
-      router.push({name: 'HomePage'})
-    })
-  })
-}
+const activeKey = ref('1');
 </script>
 <style>
-.login_class{
+body {
+  margin: 0;
+  padding: 0;
+}
+.login_back{
+  height: 100vh;
+  width: 100%;
+  background-repeat: no-repeat; /* 不重复显示背景图像 */
+  background-image: url("../assets/image/newbg.png");
+  background-color: #eee;
+  background-position: 10vw 15vh;
+  position: relative;
+}
+.all_login{
   width: 30vw;
-  margin: 30vh auto;
+  height: 65vh;
+  margin-top: 15vh;
+  margin-left: 55vw;
+  padding-top: 3vh;
+  background-color: white;
+  position: absolute;
 }
 </style>

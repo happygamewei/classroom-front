@@ -6,7 +6,7 @@
       <a-divider class="divider" type="vertical" />
       <div class="credit">已分配学时 {{courseAll ? courseAll.allocatedHours + '/' + courseAll.creditHours : ''}} </div>
       <a-progress class="progress" :percent="courseAll ? courseAll.allocatedHours / courseAll.creditHours * 100 : 0" size="small" />
-      <div style="float: right;">
+      <div style="float: right;" v-if="!isStudent">
         <el-button type="primary" plain size="large">编辑排序</el-button>
         <el-button type="primary" size="large" @click="addChapter"><PlusOutlined />&nbsp; 添加章节</el-button>
         <el-button type="success" size="large" @click="dialogVisible = true"><PlusOutlined />&nbsp; 添加内容</el-button>
@@ -18,62 +18,62 @@
           class="tree_plan"
           :tree-data="treeData"
       >
-          <template #title="item">
+        <template #title="item">
 
-            <div v-if="item.typeContent === HOMEWORK_CONTENT">
-              <HomeContent :contentInfo="item.contentInfo" />
-            </div>
-            <div v-else-if="item.typeContent === TEST_CONTENT">
-              <TestContent :contentInfo="item.contentInfo" />
-            </div>
+          <div v-if="item.typeContent === HOMEWORK_CONTENT">
+            <HomeContent :contentInfo="item.contentInfo" />
+          </div>
+          <div v-else-if="item.typeContent === TEST_CONTENT">
+            <TestContent :contentInfo="item.contentInfo" />
+          </div>
 
-            <div v-else class="tree_class">
-              <div class="expand_tree" @click="toggleSubContent(item)">
-                <div v-if="item.parentId === 0" style="font-size: 1.2rem;" >
-                  {{ item.name }}
-                </div>
-                <div v-else>{{ item.name }}</div>
-
-                <div style="margin-left: 1vw">{{item.activeNumber}}个活动</div>
-                <a-tag color="#74787C" style="margin-left: 1vw" v-if="item.teachMode === '3'">混合</a-tag>
-                <a-tag color="#74787C" style="margin-left: 1vw" v-if="item.teachMode === '2'">线下</a-tag>
-                <a-tag color="#74787C" style="margin-left: 1vw" v-if="item.teachMode === '1'">线上</a-tag>
-                <a-tag color="blue">{{item.creditHours}}学时</a-tag>
+          <div v-else class="tree_class">
+            <div class="expand_tree" @click="toggleSubContent(item)">
+              <div v-if="item.parentId === 0" style="font-size: 1.2rem;" >
+                {{ item.name }}
               </div>
+              <div v-else>{{ item.name }}</div>
 
-              <div style="margin-left: 50vw; display: flex; align-items: center;">
-                <div v-if="item.parentId === 0" @click="addSubsection(item.chapterId)">
+              <div style="margin-left: 1vw">{{item.activeNumber}}个活动</div>
+              <a-tag color="#74787C" style="margin-left: 1vw" v-if="item.teachMode === '3'">混合</a-tag>
+              <a-tag color="#74787C" style="margin-left: 1vw" v-if="item.teachMode === '2'">线下</a-tag>
+              <a-tag color="#74787C" style="margin-left: 1vw" v-if="item.teachMode === '1'">线上</a-tag>
+              <a-tag color="blue">{{item.creditHours}}学时</a-tag>
+            </div>
+
+            <div style="margin-left: 50vw; display: flex; align-items: center;" v-if="!isStudent">
+              <div v-if="item.parentId === 0" @click="addSubsection(item.chapterId)">
+                <div>
+                  <PlusOutlined />
+                </div>
+                <div style="margin-top: -0.5vh">
+                  添加小节
+                </div>
+              </div>
+              <div style="margin-left: 2.5vw;">
+                <a-dropdown :trigger="['click']">
                   <div>
-                    <PlusOutlined />
-                  </div>
-                  <div style="margin-top: -0.5vh">
-                    添加小节
-                  </div>
-                </div>
-                <div style="margin-left: 2.5vw;" >
-                  <a-dropdown :trigger="['click']">
                     <div>
-                      <div>
-                        <EllipsisOutlined style="font-size: 1.3rem" />
-                      </div>
-                      <div style="margin-top: -1vh">
-                        更多
-                      </div>
+                      <EllipsisOutlined style="font-size: 1.3rem" />
                     </div>
-                    <template #overlay>
-                      <a-menu style="width: 5vw; margin-left: -1vw">
-                        <a-menu-item key="0">
-                          <a @click="editChapter(item.chapterId, item.name, item.parentId, item.teachMode, item.creditHours)">编辑</a>
-                        </a-menu-item>
-                        <a-menu-item key="1">
-                          <a href="">删除</a>
-                        </a-menu-item>
-                      </a-menu>
-                    </template>
-                  </a-dropdown>
-                </div>
+                    <div style="margin-top: -1vh">
+                      更多
+                    </div>
+                  </div>
+                  <template #overlay>
+                    <a-menu style="width: 5vw; margin-left: -1vw">
+                      <a-menu-item key="0">
+                        <a @click="editChapter(item.chapterId, item.name, item.parentId, item.teachMode, item.creditHours)">编辑</a>
+                      </a-menu-item>
+                      <a-menu-item key="1">
+                        <a href="">删除</a>
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
               </div>
             </div>
+          </div>
 
         </template>
       </a-tree>
@@ -146,9 +146,10 @@ import {addChapterInfo, getChapterByCourse, getCourseContentInfo, updateChapterI
 import {userCourseId} from "../../../store/index.js";
 import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import {ElMessage} from "element-plus";
-import HomeContent from "@/components/HomeContent.vue";
-import TestContent from "@/components/TestContent.vue";
-import {HOMEWORK_CONTENT, TEST_CONTENT} from "@/config/setting.js";
+import HomeContent from "@/components/chapter/HomeContent.vue";
+import TestContent from "@/components/chapter/TestContent.vue";
+import {ADMIN, COMMON, HOMEWORK_CONTENT, TEST_CONTENT} from "@/config/setting.js";
+import {getRoles} from "@/utils/user-utils.js";
 
 const toCourseId = userCourseId()
 
@@ -162,7 +163,15 @@ const courseAll = ref(null)
 
 const id = ref()
 
+const isStudent = ref(true)
+
 onMounted(() => {
+  const roles = getRoles()
+  if(roles.includes(ADMIN)){
+    isStudent.value = false
+  }else if (roles.includes(COMMON)){
+    isStudent.value = true
+  }
   id.value =  toCourseId.getCourseId()
   getInfo()
   formState.courseId = id.value
@@ -249,26 +258,31 @@ const addSubsection = (courseId) => {
 
 // 提交
 const handleOk = e => {
-  openAdd.value = false;
-  if(modalTitle.value === '添加章节'){
-    formState.parentId = 0
-    addChapterInfo(formState).then((res) => {
-      ElMessage.success(res)
-      getInfo()
-    })
+  if(formState.name != ''){
+    openAdd.value = false;
+    if(modalTitle.value === '添加章节'){
+      formState.parentId = 0
+      addChapterInfo(formState).then((res) => {
+        ElMessage.success(res)
+        getInfo()
+      })
+    }
+    if(modalTitle.value === '添加小节'){
+      addChapterInfo(formState).then((res) => {
+        ElMessage.success(res)
+        getInfo()
+      })
+    }
+    if(modalTitle.value === '编辑章节' || modalTitle.value === '编辑小节'){
+      updateChapterInfo(formState).then((res) => {
+        ElMessage.success(res?.msg)
+        getInfo()
+      })
+    }
+  }else {
+    ElMessage.error("名称为空，必须添写")
   }
-  if(modalTitle.value === '添加小节'){
-    addChapterInfo(formState).then((res) => {
-      ElMessage.success(res)
-      getInfo()
-    })
-  }
-  if(modalTitle.value === '编辑章节' || modalTitle.value === '编辑小节'){
-    updateChapterInfo(formState).then((res) => {
-      ElMessage.success(res)
-      getInfo()
-    })
-  }
+
 };
 
 const expandedSubContent = ref([]); // 用于存储子内容的展开状态
@@ -288,10 +302,6 @@ const toggleSubContent = (item) => {
   }
 };
 
-
-const onSubmit = () => {
-  console.log('submit!', toRaw(formState));
-};
 const labelCol = {
   style: {
     width: '10vw',
@@ -362,7 +372,7 @@ const wrapperCol = {
   display: flex;
   align-items: center;
   height: 7vh;
-  //background-color: #EEEEEE;
+//background-color: #EEEEEE;
 }
 /* 取消默认的悬停和点击样式 */
 .ant-tree-node-content-wrapper:hover,

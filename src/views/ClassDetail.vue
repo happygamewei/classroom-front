@@ -6,7 +6,7 @@
         <h1 class="course_name">{{courseInfo ? courseInfo.name : ''}}</h1>
         <h2 class="course_class">{{courseInfo ? courseInfo.teachClass : ''}}</h2>
         <div class="course_msg">
-          <span> 加课码 {{courseInfo ? courseInfo.code : ''}}&nbsp;&nbsp; </span>
+          <span> <QrcodeOutlined />  加课码 {{courseInfo ? courseInfo.code : ''}}&nbsp;&nbsp; </span>
           <span> 已有{{courseInfo ? courseInfo.joinNumber : ''}}人加入&nbsp;&nbsp; </span>
           <span> {{courseInfo ? courseInfo.creditHours : ''}} 学时数&nbsp;&nbsp; </span>
         </div>
@@ -30,15 +30,14 @@
   </div>
 </template>
 <script setup>
-import {ref, reactive, onMounted} from 'vue';
+import {ref, reactive} from 'vue';
 import Header from "../components/Header.vue";
 import CourseTeaching from './course_teaching/index.vue'
 import StudentAnalysis from './study_analysis/index.vue'
-import axios from "../utils/request.js";
 import { useRoute } from 'vue-router';
 import {getOneCourse} from "../api/course.js";
-import {getChapterByCourse} from "../api/chapter.js";
 import {userCourseId} from "../store/index.js";
+import {QrcodeOutlined} from "@ant-design/icons-vue";
 
 const route = useRoute();
 
@@ -52,13 +51,11 @@ const toCourseId = userCourseId()
 if(courseId !== undefined){
   getOneCourse(courseId).then((res) => {
     courseInfo.value = res
-    // console.log(courseInfo.value)
   })
   toCourseId.setCourseId(courseId)
 }
 
 const active = ref(1)
-
 const state = reactive({
   mode: 'inline',
   theme: 'light',

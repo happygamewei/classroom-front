@@ -2,7 +2,7 @@
  * token操作的封装
  */
 import { TOKEN_STORE_NAME } from "../config/setting";
-import Cookies from 'js-cookie'
+
 
 /**
  * 获取缓存的 token
