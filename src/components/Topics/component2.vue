@@ -1,4 +1,5 @@
 <template>
+  <span class="totalCount">共有 {{ count }} 个活动</span>
   <a-card :bordered="true" style="width: 166vh">
     <!-- <a-card v-for="homework in homeworkList" :key="homework.homeworkId">
       {{ homework.title }} - {{ homework.description }}</a-card> -->
@@ -76,6 +77,7 @@ import {
   isJoinTopic,
   deleteTopicById,
   getDetail,
+  topicCount,
 } from "../../api/topic.js";
 import { userCourseId } from "../../store/index.js";
 import { useRouter } from "vue-router";
@@ -95,16 +97,33 @@ export default {
     const userId = ref();
     const isPost = ref();
     const showMode = ref(true);
+    const key = ref(0);
+    const count = ref(0);
 
     mitter.on("checked", (data) => {
       isPost.value = data;
       console.log("data----:" + isPost.value);
     });
+    // mitter.on("refresh", (data) => {
+    //   console.log("更新前：" + key.value);
+    //   key.value += +1;
+    //   console.log("更新后：" + key.value);
+    // });
     onMounted(() => {
       courseId.value = toCourseId.getCourseId();
       getAllTopics(courseId);
       getUserInfo1();
+      getTopicCount(courseId);
     });
+    const getTopicCount = (courseId) => {
+      topicCount(courseId.value)
+        .then((res) => {
+          count.value = res;
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
     /**
      *
      * @param courseId
@@ -122,6 +141,7 @@ export default {
     };
     const deleteTopic = (topicId) => {
       deleteTopicById(topicId);
+      mitter.emit("refresh", key.value);
     };
     const issue = (topicId) => {
       const topic = getDetail(topicId);
@@ -129,7 +149,6 @@ export default {
         mitter.emit("topic", data);
         console.log("添加开关！！！！----" + data + "," + topicId);
       });
-
       mitter.emit("showMode", showMode.value);
       mitter.emit("update", true);
     };
@@ -154,6 +173,8 @@ export default {
       goToTopicDetail,
       deleteTopic,
       issue,
+      key,
+      count,
     };
   },
 };
@@ -182,5 +203,10 @@ export default {
 .issue {
   margin-top: -7vh;
   margin-right: -110vh;
+}
+.totalCount {
+  position: relative;
+  left: -70vh;
+  top: -8vh;
 }
 </style>

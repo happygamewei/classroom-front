@@ -55,7 +55,7 @@
 
     <span class="chapter">所属章节&nbsp;&nbsp;</span>
     <el-tree-select
-      v-model="chapterName"
+      v-model="topic.chapterName"
       :props="treeProps"
       :data="treeData"
       check-strictly
@@ -102,7 +102,7 @@
           :style="(width = '50%')"
           id="inputNumber"
           name="total"
-          v-model:value="topic.score"
+          v-model:value="topic.totalScore"
           :min="0"
           :max="100"
         />
@@ -140,14 +140,11 @@ export default {
   setup() {
     const options1 = ref([]);
     const options2 = ref([]);
-    const chapterName = ref();
-    const apply = ref();
     const toCourseId = userCourseId();
     const checked1 = ref(false);
     const checked2 = ref(false);
     const showMode = ref(false);
     const courseId = ref();
-    const name = ref();
     const treeData = ref([]);
     const userId = ref();
     const type1 = ref("class_share_protoco");
@@ -165,19 +162,17 @@ export default {
       deadline: null,
       totalScore: 0,
       leastReplyNumber: 0,
+      chapterName: "",
     });
     //接受弹窗开关的传值
     mitter.on("showMode", (data) => {
       showMode.value = data;
-      console.log("开关44444444：" + data);
     });
     mitter.on("topic", (data) => {
       topic.value = data;
-      console.log("话题内容---：" + data + "," + data.value);
     });
     mitter.on("update", (data) => {
       update.value = data;
-      console.log("传过来更新的值---：" + data + "," + update.value);
     });
 
     onMounted(() => {
@@ -211,6 +206,19 @@ export default {
 
     const handleClose = () => {
       showMode.value = false;
+      topic.value.title = "";
+      topic.value.content = "";
+      topic.value.label = "话题";
+      topic.value.shareProtocol = null;
+      topic.value.process = null;
+      topic.value.publishDate = null;
+      topic.value.deadline = null;
+      topic.value.total = 0;
+      topic.value.reply = 0;
+      topic.value.chapterId = null;
+      topic.value.chapterName = "";
+      checked1.value = false;
+      checked2.value = false;
     };
 
     const handleNodeClick = (data) => {
@@ -218,55 +226,45 @@ export default {
     };
 
     const handleOk = () => {
-      console.log("更新的值：" + update.value);
+      console.log("值值：" + update.value);
       if (topic.value.title == "" || topic.value.title == null) {
         alert("标题不能为空");
         return;
       }
-      if (chapterName.value == null || chapterName.value == "") {
+      if (topic.value.chapterName == null || topic.value.chapterName == "") {
         alert("请选择章节");
         return;
       }
       if (update.value == false) {
-        console.log("话题：" + topic);
-        addTopic(topic.value, userId.value);
-        console.log("共享协议：" + topic.value.shareProtocol);
-        showMode.value = false;
-        topic.value.title = "";
-        topic.value.content = "";
-        topic.value.label = "话题";
-        topic.value.shareProtocol = null;
-        topic.value.process = null;
-        topic.value.publishDate = null;
-        topic.value.deadline = null;
-        topic.value.total = 0;
-        topic.value.reply = 0;
-        topic.value.chapterId = null;
-        chapterName.value = "";
+        console.log("课程id：" + courseId.value);
+        addTopic(courseId.value, topic.value, userId.value);
         alert("添加成功");
       } else {
-        console.log("修改之后的话题：" + topic.value.title);
         updateTopic(topic.value);
-        showMode.value = false;
-        topic.value.title = "";
-        topic.value.content = "";
-        topic.value.label = "话题";
-        topic.value.shareProtocol = null;
-        topic.value.process = null;
-        topic.value.publishDate = null;
-        topic.value.deadline = null;
-        topic.value.total = 0;
-        topic.value.reply = 0;
-        topic.value.chapterId = null;
-        chapterName.value = "";
         alert("修改成功");
+        update.value = false;
       }
+      showMode.value = false;
+      topic.value.title = "";
+      topic.value.content = "";
+      topic.value.label = "话题";
+      topic.value.shareProtocol = null;
+      topic.value.process = null;
+      topic.value.publishDate = null;
+      topic.value.deadline = null;
+      topic.value.total = 0;
+      topic.value.reply = 0;
+      topic.value.chapterId = null;
+      topic.value.chapterName = "";
+      checked1.value = false;
+      checked2.value = false;
+      //添加或修改成功后，需要刷新页面
+      mitter.emit("refresh", update.value);
     };
     const treeProps = {
       label: "name",
     };
     return {
-      chapterName,
       topic,
       handleClose,
       showMode,
@@ -274,9 +272,7 @@ export default {
       checked1,
       checked2,
       topic,
-      name,
       treeData,
-      apply,
       options1,
       options2,
       treeProps,

@@ -5,9 +5,12 @@
   >
     <template #actions>
       <span
-        ><like-outlined @click="commentClick(childComment.commentId)" />{{
-          childComment.likesNumber
-        }}&nbsp;&nbsp;<span key="comment-nested-reply-to" @click="show = true"
+        ><like-outlined
+          style="color: blue"
+          @click="commentClick(childComment.commentId)"
+        />{{ childComment.likesNumber }}&nbsp;&nbsp;<span
+          key="comment-nested-reply-to"
+          @click="show = true"
           >回复</span
         >&nbsp;&nbsp;</span
       >
@@ -47,19 +50,24 @@
       <a-textarea v-model:value="comment" placeholder="输入评论" :rows="4" />
       <br />
       <a-button @click="show = false">取消</a-button>
-      <a-button type="primary" @click="reply(topicId, childComment.commentId)"
+      <a-button type="primary" @click="reply(childComment.commentId)"
         >发表评论</a-button
       >
     </div>
     <el-divider />
     <!-- 嵌套递归 -->
-    <Child :childComments="childComment.chlid" v-if="shouldRenderChild">
+    <Child
+      :childComments="childComment.child"
+      :topicId="topicId"
+      v-if="shouldRenderChild"
+    >
     </Child>
   </a-comment>
 </template>
 <script>
 import { LikeOutlined, DeleteOutlined } from "@ant-design/icons-vue";
 import { useRoute } from "vue-router";
+import { userCourseId } from "../../store/index.js";
 import {
   getUserInfo,
   deleteComment,
@@ -73,13 +81,16 @@ export default {
     DeleteOutlined,
   },
   name: "Child",
-  setup() {
+  setup(props) {
     const visible = ref(false);
     const show = ref(false);
     const router = useRoute();
     const userId = ref();
     const comment = ref();
+    const toCourseId = userCourseId();
+    const courseId = ref();
     onMounted(() => {
+      courseId.value = toCourseId.getCourseId();
       getInfo();
     });
     const getInfo = () => {
@@ -88,20 +99,29 @@ export default {
       });
     };
     //添加有父评论的评论
-    const reply = (topicId, parentId) => {
+    const reply = (parentId) => {
       console.log("comment:" + comment.value);
-      replyComment(userId.value, topicId, comment.value, parentId);
+      replyComment(
+        courseId.value,
+        userId.value,
+        props.topicId,
+        comment.value,
+        parentId
+      );
       comment.value = "";
       show.value = false;
+      location.reload();
     };
     //删除评论
     const deleteReview = (item) => {
       deleteComment(item);
       visible.value = false;
+      location.reload();
     };
     //评论点赞功能
     const commentClick = (commentId) => {
       commentLikes(userId.value, commentId);
+      location.reload();
     };
     return {
       router,
@@ -125,7 +145,7 @@ export default {
       required: true,
     },
     topicId: {
-      type: BigInt,
+      type: Number,
       required: true,
     },
   },
