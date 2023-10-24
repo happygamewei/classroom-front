@@ -39,3 +39,12 @@ export async function getAllComment(data){
     return Promise.reject(new Error(res.msg));
 }
 
+export async function update(data){
+    const res = await request.post('/classroom/notice/edit',data)
+    if(res.code === 200){
+        return res.data
+    }
+    return Promise.reject(new Error(res.msg));
+}
+
+
