@@ -155,34 +155,45 @@
       </div>
     </a-modal>
     <div class="Resource_bottom">
-<!--      <a-list :dataSource="resourceList" bordered>-->
-<!--        <template #renderItem="{ item }">-->
-<!--          <a-list-item v-for="(value, key) in item" :key="key">{{ key }}: {{ value }}</a-list-item>-->
-<!--        </template>-->
-<!--      </a-list>-->
-      <a-list data-source="resourceList" item-layout="horizontal">
-        <template #renderItem="{ item }">
-          <a-list-item>
-            <template #actions>
-              <a key="list-loadmore-edit">edit</a>
-              <a key="list-loadmore-more">more</a>
-            </template>
-            <a-skeleton avatar :title="false" :loading="!!item.loading" active>
+      <a-card :bordered="true" style="width: 80vw;text-align: left;">
+        <!-- <a-card v-for="homework in homeworkList" :key="homework.homeworkId">
+          {{ homework.title }} - {{ homework.description }}</a-card> -->
+        <a-list item-layout="horizontal"  >
+          <template v-for="item in resourceList" :key="item.resourceId">
+            <a-list-item>
               <a-list-item-meta
-                  description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-              >
+                  description=" " >
                 <template #title>
-                  <a href="https://www.antdv.com/">{{ item.title }}</a>
+<!--                  <a href="#" style="font-size: 16px;">{{ item.title}}</a>-->
+                  <div  style="height: 12vh;width: 28vh;cursor: pointer;">
+                    <a  style=" font-size: large;width: 10vh; margin: 2vh 0vh 0vh 3vh; float: left;color: black;">{{ item.title }}</a>
+                    <div style="float: left; position: absolute;" v-if="item.publishDate==null">
+                      <p style="display: inline-block;">未发布</p>
+                      <p style="display: inline-block" v-if="item.typeLabel=='外链' ">&nbsp|&nbsp 外链资源</p>
+                      <p style="display: inline-block">&nbsp|&nbsp {{item.process}}</p>
+                      <p style="display: inline-block; margin: 7vh 2vh 0vh 3vh;"></p>
+<!--                      <p style="display: inline-block;" v-if="item.deadline==null"> &nbsp不限 &nbsp</p>-->
+<!--                      <p style="display: inline-block;">{{ item.deadline }}</p> &nbsp|</p>-->
+<!--                      <p style="display: inline-block;" v-if="item.testLabel==1">普通测试</p>-->
+<!--                      <p style="display: inline-block;" v-if="item.testLabel==2">考试</p>-->
+                    </div>
+                    <div style="float: left; position: absolute;" v-else>
+                      <p style="display: inline-block;" v-if="item.deadline!=null&&formattedTime<item.deadline">已结束 &nbsp|</p>
+                      <p style="display: inline-block; margin: 7vh 2vh 0vh 0vh;">截至时间:
+                      <p style="display: inline-block;" v-if="item.deadline==null"> &nbsp不限 &nbsp</p>
+                      <p style="display: inline-block;">{{ item.deadline }}</p> &nbsp|</p>
+                    </div>
+                   </div>
                 </template>
-<!--                <template #avatar>-->
-<!--                  <a-avatar :src="item.picture.large" />-->
-<!--                </template>-->
+                <template #avatar>
+                  <a-avatar style="width: 8vh; height: 8vh ;" src="src/assets/image/icon-resource.png"></a-avatar>
+                  <p style="margin-left: 0.3vw;font-size: 16px;">作业</p>
+                </template>
               </a-list-item-meta>
-              <div>content</div>
-            </a-skeleton>
-          </a-list-item>
-        </template>
-      </a-list>
+            </a-list-item>
+          </template>
+        </a-list>
+      </a-card>
     </div>
   </div>
 
@@ -201,6 +212,8 @@ import {ElMessage} from "element-plus";
 const toCourseId = userCourseId()
 const id = ref()
 const createBy = ref();
+const currentDate = new Date();
+const formattedTime = currentDate.toLocaleString(); //获取当前时间
 onMounted(()=>{
   id.value =  toCourseId.getCourseId();
   formState.courseId = id.value
@@ -231,7 +244,6 @@ const classTypeList = ref(null);
 const chapterList = ref(null);
 const modalTitle = ref('添加资料')
 const selectedOption = ref(null);
-const selectedSubOption = ref(null);
 const resourceList = ref(null);
 
 //应用环节的数组
@@ -312,8 +324,6 @@ const addResource = () => {
 const getResourceByCourseInfo = (courseId) => {
   getResource(courseId).then((res) => {
     resourceList.value = res
-    console.log("resource")
-    console.log(resourceList.value)
   })
 }
 // 获取章节信息
@@ -389,6 +399,9 @@ const handleAddResource = () =>{
   addResourceInfo(formState).then((res) =>{
     ElMessage.success(res)
   })
+  console.log("提交")
+  getResourceByCourseInfo(id.value)
+  console.log("袁教牛逼")
 }
 
 </script>
