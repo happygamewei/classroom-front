@@ -2,26 +2,45 @@
   <div class="Resource_all">
     <div class="Resource_top" style="width: 100%; height: 3vw">
       <div class="Resource_top-left">
-        <h3>
-          <span>共0个活动</span>
-        </h3>
+          共{{num}}个活动
       </div>
       <div class="Resource_top-right">
 <!--        <el-button type="success" size="large">+ 新建文件夹</el-button>-->
-        <el-button type="primary" plain size="large" @click="addResource()">+ 添加资料</el-button>
+        <el-button type="success" plain size="large" @click="addResource()"><PlusOutlined />&nbsp; 添加资料</el-button>
       </div>
     </div>
 
     <div class="link-top"></div>
-
     <div class="Resource_bottom" style="width: 100%" >
       <div class="Resource_bottom-top" style="height: 3vw">
         <div class="Resource_bottom-top-left" style="float: left">
           <span style="font-size: large">全部学习资料</span>
         </div>
         <div class="Resource_bottom-top-right" style="float: right;margin-right: 9vw">
-          <el-button type="success" size="large">排序</el-button>
-          <el-button type="primary" plain size="large">批量操作</el-button>
+<!--          <el-button type="success" size="large">排序</el-button>-->
+          <a-dropdown>
+            <a class="ant-dropdown-link" @click.prevent style=" color: rgb(83, 133, 250); margin-top: 1vh;">
+              <OrderedListOutlined />
+              &nbsp 排序
+            </a>
+            <template #overlay>
+              <a-menu>
+                <a-menu-item>
+                  <a href="javascript:;">按添加时间升序</a>
+                </a-menu-item>
+                <a-menu-item>
+                  <a href="javascript:;">按添加时间降序</a>
+                </a-menu-item>
+                <a-menu-item>
+                  <a href="javascript:;">按名称升序</a>
+                </a-menu-item>
+                <a-menu-item>
+                  <a href="javascript:;">按名称降序</a>
+                </a-menu-item>
+              </a-menu>
+            </template>
+          </a-dropdown>
+          <el-button type="primary" plain size="large"><CheckOutlined />批量操作</el-button>
         </div>
       </div>
     </div>
@@ -154,17 +173,16 @@
         </div>
       </div>
     </a-modal>
-    <div class="Resource_bottom">
+    <div class="Resource_bottom" style="margin-top: 6vh; width: 159vh;">
       <a-card :bordered="true" style="width: 80vw;text-align: left;">
         <!-- <a-card v-for="homework in homeworkList" :key="homework.homeworkId">
           {{ homework.title }} - {{ homework.description }}</a-card> -->
-        <a-list item-layout="horizontal"  >
+        <a-list item-layout="horizontal">
           <template v-for="item in resourceList" :key="item.resourceId">
             <a-list-item>
               <a-list-item-meta
                   description=" " >
                 <template #title>
-<!--                  <a href="#" style="font-size: 16px;">{{ item.title}}</a>-->
                   <div  style="height: 12vh;width: 28vh;cursor: pointer;">
                     <a  style=" font-size: large;width: 10vh; margin: 2vh 0vh 0vh 3vh; float: left;color: black;">{{ item.title }}</a>
                     <div style="float: left; position: absolute;" v-if="item.publishDate==null">
@@ -172,22 +190,61 @@
                       <p style="display: inline-block" v-if="item.typeLabel=='外链' ">&nbsp|&nbsp 外链资源</p>
                       <p style="display: inline-block">&nbsp|&nbsp {{item.process}}</p>
                       <p style="display: inline-block; margin: 7vh 2vh 0vh 3vh;"></p>
-<!--                      <p style="display: inline-block;" v-if="item.deadline==null"> &nbsp不限 &nbsp</p>-->
-<!--                      <p style="display: inline-block;">{{ item.deadline }}</p> &nbsp|</p>-->
-<!--                      <p style="display: inline-block;" v-if="item.testLabel==1">普通测试</p>-->
-<!--                      <p style="display: inline-block;" v-if="item.testLabel==2">考试</p>-->
                     </div>
                     <div style="float: left; position: absolute;" v-else>
-                      <p style="display: inline-block;" v-if="item.deadline!=null&&formattedTime<item.deadline">已结束 &nbsp|</p>
+                      <p style="display: inline-block;" v-if="isCurrentTimeAfterBackendTime(item.deadline)">已结束 &nbsp|&nbsp</p>
                       <p style="display: inline-block; margin: 7vh 2vh 0vh 0vh;">截至时间:
                       <p style="display: inline-block;" v-if="item.deadline==null"> &nbsp不限 &nbsp</p>
-                      <p style="display: inline-block;">{{ item.deadline }}</p> &nbsp|</p>
+                      <p style="display: inline-block;">{{ item.deadline }}</p>&nbsp|</p>
+                      <p style="display: inline-block;">{{ item.process }}</p>
                     </div>
-                   </div>
+                  </div>
+                  <div v-if="item.publishDate == null" style="margin-left: 75vh; margin-top: -15vh; width: 75vh; height: 15vh; display: inline-block; position: absolute;">
+                    <div class="ant-dropdown-link" @click.prevent  style="float: right;margin-top: 1.25vh;cursor: pointer;">
+
+                      <a-dropdown>
+                        <a style="color: black;">
+                          <div class="change" style="font-size: 3vh;">
+                            <EllipsisOutlined />
+                          </div>
+                          更多</a>
+                        <template #overlay>
+                          <a-menu>
+                            <a-menu-item>
+                              <a @click="Edit">编辑</a>
+                            </a-menu-item>
+                            <a-menu-item>
+                              <a href="javascript:;">移动到章节</a>
+                            </a-menu-item>
+                            <a-menu-item>
+                              <a href="javascript:;">保存试卷到备课区</a>
+                            </a-menu-item>
+                            <a-menu-item>
+                              <a href="javascript:;">分享</a>
+                            </a-menu-item>
+                            <a-menu-item>
+                              <a @click="deletetest(item.testId,'bottom')">删除</a>
+                            </a-menu-item>
+                          </a-menu>
+                        </template>
+                      </a-dropdown>
+                    </div>
+
+                    <div style="float: right; margin: 2vh 0vh 0vh 6vh;">
+                      <a-divider type="vertical" style="height: 60px; background-color: rgb(215, 215, 215)" />
+                      <a-divider type="vertical" style="height: 60px; border-color: rgb(215, 215, 215)" dashed />
+                    </div>
+
+                    <div style="float: right; margin: 1.25vh 0vh 0vh 6vh;cursor: pointer;" v-if="item.publishDate==null">
+                      <div class="change" style="font-size: 3vh;">
+                        <SendOutlined />
+                      </div>
+                      <p>发布</p></div>
+                  </div>
                 </template>
                 <template #avatar>
                   <a-avatar style="width: 8vh; height: 8vh ;" src="src/assets/image/icon-resource.png"></a-avatar>
-                  <p style="margin-left: 0.3vw;font-size: 16px;">作业</p>
+                  <p style="margin-left: 0.3vw;font-size: 16px;">外链</p>
                 </template>
               </a-list-item-meta>
             </a-list-item>
@@ -200,7 +257,7 @@
 </template>
 <script lang="ts" setup>
 
-import {LinkOutlined} from '@ant-design/icons-vue';
+import {LinkOutlined,CheckOutlined,PlusOutlined,EllipsisOutlined,SendOutlined} from '@ant-design/icons-vue';
 import {userCourseId} from "../../../store/index.js";
 import {onMounted, reactive, ref} from "vue";
 import {getDicts} from "../../../api/dict.js";
@@ -214,6 +271,7 @@ const id = ref()
 const createBy = ref();
 const currentDate = new Date();
 const formattedTime = currentDate.toLocaleString(); //获取当前时间
+const num = ref(0) //获取资料的数量
 onMounted(()=>{
   id.value =  toCourseId.getCourseId();
   formState.courseId = id.value
@@ -230,6 +288,7 @@ onMounted(()=>{
     createBy.value = res.user.createBy
   })
   getResourceByCourseInfo(id.value)
+  // console.log("当前时间"+formattedTime)
 })
 
 
@@ -324,6 +383,7 @@ const addResource = () => {
 const getResourceByCourseInfo = (courseId) => {
   getResource(courseId).then((res) => {
     resourceList.value = res
+    num.value = res.length
   })
 }
 // 获取章节信息
@@ -402,6 +462,33 @@ const handleAddResource = () =>{
   console.log("提交")
   getResourceByCourseInfo(id.value)
   console.log("袁教牛逼")
+}
+
+//判断时间
+const isCurrentTimeAfterBackendTime = (deadline) =>{
+  const date = new Date(formattedTime)
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+// 拼接并格式化日期时间字符串
+  const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  if (deadline!=null){
+    const str1 = new Date(deadline).getTime();
+    const str2 = new Date(formattedDateTime).getTime();
+   if (str1-str2<0)
+     return true
+   else return false
+  }
+  else
+    return false
+}
+
+//测试
+const gengduo = (resourceId) =>{
+  console.log(resourceId)
 }
 
 </script>
