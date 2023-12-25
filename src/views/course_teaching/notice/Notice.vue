@@ -12,13 +12,14 @@
 
     <div class="dialog" style="width: 60vw;" onsubmit="return false" >
 
-      <el-dialog v-model="dialogFormVisible" title="添加公告" width="60vw">
+      <el-dialog v-model="dialogFormVisible" title="添加公告" width="60vw" class = "notice_dialog">
         <hr class="hr1">
         <el-form :model="form" class="form">
 
           <el-form-item label="公告标题" :hide-required-asterisk="false" required class="form_1">
             <el-input
                 v-model="form.title"
+                class = "w-30 m-5"
                 maxlength="75"
                 placeholder="Please input"
                 show-word-limit
@@ -121,46 +122,75 @@
       </el-dialog>
     </div>
     <div class="announce-box">
+      <a-card>
       <!--全部公告-->
-      <a-list id="viewer-container-lists" style="list-style: none">
+      <a-list id="viewer-container-lists" style="list-style: none;display:inline">
 <!--        <li v-for="(item,index) in noticeList" v-bind:key="item.id">-->
-        <template style="list-style: none" v-for="(item,index) in noticeList" :key="item?.noticeId">
-          <div class="announce-cont-box" style="padding-top: 4vh">
-            <el-popconfirm title="确定删除?"
-                           @confirm="confirmEvent(item.noticeId)"
-                           @cancel="cancelEvent">
-              <template #reference>
-                <el-button  class="delbutton" type="danger" :icon="Delete" circle v-if="user.admin"></el-button>
-              </template>
-            </el-popconfirm>
-            <div class="notice_pic" style="float: left;height: 14vh;width: 4vw">
+        <template style="list-style: none;display:inline" v-for="(item,index) in noticeList" :key="item?.noticeId">
+          <div class="announce-cont-box" style="padding-top: 1vh">
+
+            <div class="ant-dropdown-link" @click.prevent  style="float: right;margin-top: 1.25vh;cursor: pointer;">
+
+              <a-dropdown>
+                <a style="color: black;">
+                  <div class="change" style="font-size: 3vh;">
+                    <EllipsisOutlined />
+                  </div>
+                  更多</a>
+
+                <template #overlay>
+                  <a-menu>
+                    <a-menu-item>
+                      <a @click="Edit(item.noticeId)">编辑</a>
+                    </a-menu-item>
+                    <a-menu-item>
+
+                      <div>
+                        <a type="primary" @click="showModal">删除</a>
+                        <a-modal v-model:open="open" title="提示" @ok="confirmEvent(item.noticeId)">
+                          <p>确认删除本条公告吗？</p>
+                        </a-modal>
+                      </div>
+<!--                      <el-popconfirm title="确定删除?"-->
+<!--                                     @confirm="confirmEvent(item.noticeId)"-->
+<!--                                     @cancel="cancelEvent">-->
+<!--                        <template #reference>-->
+<!--                          <a>删除</a>-->
+<!--&lt;!&ndash;                          <el-button  class="delbutton" v-if="user.admin"></el-button>&ndash;&gt;-->
+<!--                        </template>-->
+
+<!--                      </el-popconfirm>-->
+
+                    </a-menu-item>
+                  </a-menu>
+                </template>
+              </a-dropdown>
+            </div>
+            <div style="margin-left: -60%">
+            <div class="notice_pic" style="height: 14vh;width: 4vw;display: inline-block">
               <img src="https://www.ketangpai.com/images/ic_bulletin.svg" style="width: 3vw;height: 3vw">
               公告
             </div>
 
-            <div class="notice_content" style="text-align: left;margin-left: 13vh">
+            <div class="notice_content" style="text-align: left;margin-left: 7vh;display: inline-block;margin-top: -10vh">
               <div class="title clearfix">
-                <h3><a @click="JumpToNoticeDetail(item.noticeId)">{{item.title}} </a></h3>
+
               </div>
-              <div class="notice_msg" style="font-size: 5px">
+              <h2><a @click="JumpToNoticeDetail(item.noticeId)">{{item.title}} </a></h2>
+              <div class="notice_msg" style="font-size: 1.7vh">
                 <span>发布时间：{{item.createTime}}</span>
                 <a>
                   <span>&nbsp;评论<b>{{ totalCommentListNum[index] }}</b></span>
                 </a>
-<!--                <a>-->
-<!--                  <span>已读<b>2</b></span>-->
-<!--                </a>-->
-<!--                <a>-->
-<!--                  <span>未读<b>2</b></span>-->
-<!--                </a>-->
               </div>
             </div>
-
+            </div>
           </div>
 
-          <hr style="margin-left: 30px;margin-right: 30px;margin-top:10px; border:0.1px solid #ececec  ">
+          <hr style="margin-left: 6vh;margin-right: 3vh;margin-top:-2vh; border:0.1px solid #ececec  ">
         </template>
       </a-list>
+      </a-card>
     </div>
 
   </div>
@@ -168,13 +198,13 @@
 </template>
 <script lang="ts" setup>
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
-
+import {EllipsisOutlined } from '@ant-design/icons-vue';
 import {reactive, onBeforeUnmount, ref, shallowRef, onMounted} from 'vue'
 import {Editor, Toolbar} from '@wangeditor/editor-for-vue'
 import {useRouter} from "vue-router";
 import {userCourseId} from "../../../store";
 
-import {addNotice, deleteNotice, getAllNotice} from "../../../api/notice.js"
+import {addNotice, deleteNotice, getAllNotice, getOneNotice, update} from "../../../api/notice.js"
 import {getCommentListTotal} from "../../../api/comment.js"
 import {ElMessage} from "element-plus";
 // import NoticeDialog from "./NoticeDialog.vue";
@@ -184,6 +214,7 @@ import {
 
 } from '@element-plus/icons-vue'
 import {getInfo} from "../../../api/login.js";
+
 const toCourseId = userCourseId()
 const dialogFormVisible = ref(false);
 
@@ -192,12 +223,11 @@ const id = ref()
 const user = ref({
   admin:''
 })
-
 // 编辑器实例，必须用 shallowRef
 const editorRef = shallowRef()
 const publishTime = ref();
 // 内容 HTML
-const valueHtml = ref('<p>hello</p>')
+const valueHtml = ref()
 onMounted(() => {
   getInfo().then(res => {
     user.value = res.user
@@ -268,13 +298,15 @@ const deleteNoticeClick = (e) =>{
   })
 
 }
+const open = ref<boolean>(false);
+const showModal = () => {
+  open.value = true;
+};
+
 const confirmEvent = (e) => {
+  open.value = false;
   deleteNoticeClick(e)
 }
-const cancelEvent = () => {
-}
-
-const  childRef = ref(null);
 
 //跳转到公共详情页面
 const router = useRouter();
@@ -288,7 +320,7 @@ const JumpToNoticeDetail = (e) => {
    }
   })
 }
-const form = reactive({
+let form = reactive({
   noticeId:'',
   title: '',
   content: '',
@@ -307,9 +339,19 @@ form.typeLabel='';
 form.content='';
 form.chapterId='';
 form.publishDate='';
+
 }
-//创建章节
-const submitForm = (e)=>{
+
+const submitForm=(e)=>{
+  if(form.noticeId==''){
+    addSubmint();
+  }else {
+    editSubmit();
+  }
+
+}
+//新建确认按钮
+const addSubmint = ()=>{
   form.publishDate = publishTime.value;
   dialogFormVisible.value=false;
   form.content=valueHtml.value;
@@ -318,6 +360,30 @@ const submitForm = (e)=>{
     ElMessage.success("发布成功！")
     getNoticeAll()
     // getInfo()
+  })
+}
+const Edit =(e)=>{
+  getOneNotice(e).then((res)=>{
+    console.log("edit:",res)
+    form.noticeId = res.noticeId
+    form.title = res.title
+    form.content = res.content
+    form.publishDate = res.publishDate
+    form.shareProtocol= res.shareProtocol
+    form.process = res.process
+    form.typeLabel = res.typeLabel
+    form.chapterId = res.chapterId
+    dialogFormVisible.value =true;
+
+  })
+}
+const editSubmit=()=>{
+  dialogFormVisible.value=false;
+  form.content=valueHtml.value;
+  console.log("aaaa",form)
+   update(form).then((res)=>{
+    ElMessage.success("修改成功")
+    getNoticeAll()
   })
 }
 
@@ -393,32 +459,30 @@ const isPublish = ref(true)
   margin-top: 1vh;
 }
 
-.announce-box {
-  /*padding-bottom: 40px;*/
-  /*height: 30vh;*/
-}
+/*.announce-box {*/
+/*  !*padding-bottom: 40px;*!*/
+/*  !*height: 30vh;*!*/
+/*}*/
 
-.announce-box #viewer-container-lists {
-  width: 100%;
-  /*height: 15vh;*/
-  border: 1px solid #dadce0;
-  border-radius: 5px;
-  position: relative;
-}
-.delbutton{
-  position: absolute;
-  right: 32px;
-  /*top:30px*/
-}
-.el-button--text {
-  margin-right: 15px;
-}
+/*.announce-box #viewer-container-lists {*/
+/*  width: 100%;*/
+/*  !*height: 15vh;*!*/
+/*  border: 1px solid #dadce0;*/
+/*  border-radius: 5px;*/
+/*  position: relative;*/
+/*}*/
+/*.delbutton{*/
+/*  position: absolute;*/
+/*  right: 32px;*/
+/*  !*top:30px*!*/
+/*}*/
 
-.el-select {
+
+.m-2 {
   width: 20vw;
 }
 
-.el-input {
+.w-30 m-5 {
   width: 20vw;
 }
 
@@ -433,12 +497,9 @@ const isPublish = ref(true)
   width: 60vw;
 }
 
-.el-dialog {
+.notice_dialog {
   border-radius: 10px;
   text-align: left
-}
-hr{
-
 }
 
 </style>

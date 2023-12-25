@@ -1,6 +1,5 @@
 <template>
   <div>
-    <span class="totalCount">共有 {{ count }} 个活动</span>
     <span>
       <ordered-list-outlined style="color: blue" />
       <a-dropdown>
@@ -114,10 +113,6 @@ export default {
 </script>
 
 <style>
-.totalCount {
-  position: relative;
-  left: -50vh;
-}
 .middleRight {
   margin-right: 50vh;
   float: left;

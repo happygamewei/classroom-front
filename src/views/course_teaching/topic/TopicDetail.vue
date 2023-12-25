@@ -47,8 +47,12 @@
     <div class="middle1">
       全部评论<span>共{{ count }}条</span>
     </div>
-    <a-card class="bottomCard" style="width: 150vh">
+    <a-card :key="key" class="bottomCard" style="width: 150vh">
+      <span v-if="comments.length === 0">
+        <a-empty :image="simpleImage" />
+      </span>
       <a-comment
+        v-else
         v-for="item in comments"
         :key="item.commentId"
         :commentId1="getCommentId(item)"
@@ -56,13 +60,8 @@
         <template #actions>
           <span
             ><like-outlined
-              v-if="like"
               style="color: blue"
               @click="commentClick(item.commentId)"
-            /><like-outlined
-              style="color: black"
-              @click="commentClick(item.commentId)"
-              v-else
             />{{ item.likesNumber }}&nbsp;&nbsp;<span
               key="comment-nested-reply-to"
               @click="show = true"
@@ -116,9 +115,9 @@
         </div>
         <el-divider />
         <ChildComponent
-          :childComments="item.chlid"
+          :childComments="item.child"
           :topicId="topicId"
-          v-if="item.chlid != null"
+          v-if="item.child != null"
         >
         </ChildComponent>
       </a-comment>
@@ -129,7 +128,9 @@
 <script>
 import { onMounted, ref, computed } from "vue";
 import { LikeOutlined, DeleteOutlined } from "@ant-design/icons-vue";
+import { Empty } from "ant-design-vue";
 import ChildComponent from "/src/components/Topics/childComponent.vue";
+import { userCourseId } from "../../../store/index.js";
 import mitter from "../../../main.js";
 import {
   getDetail,
@@ -154,6 +155,7 @@ export default {
   },
 
   setup() {
+    const toCourseId = userCourseId();
     const show = ref(false);
     const visible = ref(false);
     const object = ref();
@@ -170,8 +172,11 @@ export default {
     const refreshPage = ref(false);
     const commentId1 = ref();
     const like = ref();
+    const key = ref(0);
+    const courseId = ref();
 
     onMounted(() => {
+      courseId.value = toCourseId.getCourseId();
       topicDetail1(topicId);
       getInfo();
       getAllTopicComment(topicId);
@@ -190,6 +195,7 @@ export default {
     const clickCount = () => {
       likeCount(userId.value, topicId).then((res) => {
         console.log(res);
+        location.reload();
       });
     };
     const topicDetail1 = (topicId) => {
@@ -208,12 +214,15 @@ export default {
     };
     const postComments = () => {
       console.log("评论：" + comment.value);
+      console.log("评论：" + courseId.value);
       if (isPost == "true") {
         if (comment.value == "" || comment.value == null) {
           alert("内容不能为空");
         } else {
-          postComment(userId.value, topicId, comment.value);
+          postComment(courseId.value, userId.value, topicId, comment.value);
+          alert("评论发表成功");
           comment.value = "";
+          location.reload();
         }
       } else {
         alert("老师已禁止学生话题讨论");
@@ -235,19 +244,29 @@ export default {
     };
     //添加有父评论的评论
     const reply = (parentId) => {
-      replyComment(userId.value, topicId, comment.value, parentId);
+      replyComment(
+        courseId.value,
+        userId.value,
+        topicId,
+        comment.value,
+        parentId
+      );
       comment.value = "";
       show.value = false;
+      alert("添加评论成功");
+      location.reload();
     };
     //删除评论
     const deleteReview = (item) => {
       deleteComment(item);
       visible.value = false;
       refreshPage.value = true;
+      location.reload();
     };
     //评论点赞功能
     const commentClick = (commentId) => {
       commentLikes(userId.value, commentId);
+      location.reload();
     };
     const getCommentId = computed(() => {
       return (item) => {
@@ -282,6 +301,8 @@ export default {
       commentId1,
       getCommentId,
       like,
+      key,
+      simpleImage: Empty.PRESENTED_IMAGE_SIMPLE,
     };
   },
 };

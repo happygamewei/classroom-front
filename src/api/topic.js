@@ -44,15 +44,15 @@ export async function getUserInfo(){
 /**
  * 添加话题的评论
  */
-export async function postComment(userId,topicId,comment){
-  const res=await request.post('/classroom/topic/addTopicComment/'+userId+'/'+topicId+'/'+comment);
+export async function postComment(courseId,userId,topicId,comment){
+  const res=await request.post('/classroom/topic/addTopicComment/'+courseId+'/'+userId+'/'+topicId+'/'+comment);
   
 }
 /**
  *添加回复的评论
  */
- export async function replyComment(userId,topicId,comment,parentId){
-  const res=await request.post('/classroom/topic/addTopicReplyComment/'+userId+'/'+topicId+'/'+comment+'/'+parentId);
+ export async function replyComment(courseId,userId,topicId,comment,parentId){
+  const res=await request.post('/classroom/topic/addTopicReplyComment/'+courseId+'/'+userId+'/'+topicId+'/'+comment+'/'+parentId);
   
 }
 /**
@@ -74,8 +74,12 @@ export async function isJoinTopic(userId,topicId){
 export async function getAllTopicComments(topicId){
   const res=await request.get('classroom/topic/getAllComments/'+topicId)
    
-  if(res.code==200)
+  if(res.code==200){
+    console.log(res);
+    console.log(res.data);
     return res.data
+  }
+    
   return Promise.reject(new Error(res.Error))
 }
 /**
@@ -95,9 +99,9 @@ return Promise.reject(new Error(res.Error))
 /**
  * 添加话题
  */
-export async function addTopic(topic,userId){
+export async function addTopic(courseId,topic,userId){
   console.log(topic)
-  const res=await request.post('classroom/topic/'+userId,topic,
+  const res=await request.post('classroom/topic/'+courseId+'/'+userId,topic,
   {
     headers: {
       'Content-Type': 'application/json',
@@ -134,7 +138,6 @@ export async function getDictionaryByType(type){
   console.log("typetyepe:"+type)
   const res=await request.get('classroom/topic/getDictionaryByType/'+type)
   if(res.code==200){
-    console.log("data:"+res.data)
     return res.data;
   }
 
