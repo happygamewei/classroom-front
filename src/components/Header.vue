@@ -20,15 +20,36 @@
       </a-breadcrumb>
     </div>
 
-    <div class="login_btn" @click="toLogin">
-      登录
+<!--    <div class="login_btn" @click="toLogin">-->
+    <div class="login_btn">
+      <a-dropdown :trigger="['click']">
+        <a>登录</a>
+        <template #overlay>
+          <a-menu style="width: 8vw; margin-left: 3vw">
+            <a-menu-item key="0">
+              <SettingOutlined />
+              <a > 个人设置</a>
+            </a-menu-item>
+            <a-menu-item key="1">
+              <DeleteOutlined />
+              <a @click="handleLogout"> 退出登录</a>
+            </a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown>
     </div>
+
   </div>
 </template>
 <script setup>
 import {useRouter, useRoute} from "vue-router";
 import {onMounted, reactive, watch} from "vue";
 import {userCourseId} from "@/store/index.js";
+import {SettingOutlined, DeleteOutlined} from "@ant-design/icons-vue";
+import {logout} from "@/api/login.js";
+import {ElMessage} from "element-plus";
+import {removeRoles, removeUserId} from "@/utils/user-utils.js";
+import {removeToken} from "@/utils/token-utils.js";
 
 const router = useRouter();
 const toLogin = () => {
@@ -61,6 +82,16 @@ const toThisPage = (item) => {
   })
 }
 
+// 退出操作
+const handleLogout = () => {
+  logout().then(res => {
+    ElMessage.success(res)
+    removeToken()
+    removeRoles()
+    removeUserId()
+    location.reload()
+  })
+}
 
 </script>
 <style>

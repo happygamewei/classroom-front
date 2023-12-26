@@ -26,3 +26,12 @@ export async function getInfo() {
     }
     return Promise.reject(new Error(res?.msg));
 }
+
+// 退出
+export async function logout() {
+    const res = await request.post('/logout')
+    if(res?.code === 200){
+        return res?.msg
+    }
+    return Promise.reject(new Error(res?.msg))
+}

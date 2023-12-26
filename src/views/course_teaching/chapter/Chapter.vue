@@ -124,7 +124,7 @@
           </div>
           <div class="content_class">
             <img src="@/assets/image/icon-testing.svg" alt="测试" style="height: 5vh" />
-            <div style="margin-left: 0.3vw">测试</div>
+            <div style="margin-left: 0.3vw" @click="AddTest">测试</div>
           </div>
           <div class="content_class">
             <img src="@/assets/image/icon-notice.svg" alt="公告" style="height: 5vh" />
@@ -150,6 +150,7 @@ import HomeContent from "@/components/chapter/HomeContent.vue";
 import TestContent from "@/components/chapter/TestContent.vue";
 import {ADMIN, COMMON, HOMEWORK_CONTENT, TEST_CONTENT} from "@/config/setting.js";
 import {getRoles} from "@/utils/user-utils.js";
+import {useRouter} from "vue-router";
 
 const toCourseId = userCourseId()
 
@@ -310,6 +311,15 @@ const labelCol = {
 const wrapperCol = {
   span: 20,
 };
+
+const router = useRouter();
+// 添加测试
+const AddTest = () => {
+  console.log(123)
+  router.push({
+    name:'AddTest',
+  })
+}
 
 
 </script>

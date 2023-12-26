@@ -63,7 +63,8 @@
               </template>
             </a-dropdown>
           </div>
-          <div style="float: right; font-size: 0.8rem">取消置顶</div>
+          <div v-if="item.isTop === '1'" style="float: right; font-size: 0.8rem; cursor: pointer;" @click.stop="handleCancelTop(item.courseId, item.isTop)">取消置顶</div>
+          <div v-else style="float: right; font-size: 0.8rem; cursor: pointer;" @click.stop="handleCancelTop(item.courseId, item.isTop)">置顶</div>
         </div>
       </div>
     </div>
@@ -88,7 +89,7 @@
 import { ref } from 'vue';
 import {QrcodeOutlined, DownOutlined, EllipsisOutlined} from "@ant-design/icons-vue";
 import {useRouter} from "vue-router";
-import {deleteCourse, openTheCourse, overTheCourse, renewCode} from "@/api/course.js";
+import {cancelCourse, deleteCourse, openTheCourse, overTheCourse, renewCode} from "@/api/course.js";
 import {ElMessage} from "element-plus";
 import QrcodeVue from 'qrcode.vue'
 
@@ -202,6 +203,14 @@ const renewCourseCode = (courseId) => {
   renewCode(courseId).then(res => {
     ElMessage.success(res)
     location.reload();
+  })
+}
+
+// 取消置顶
+const handleCancelTop = (courseId, isTop) => {
+  console.log(213)
+  cancelCourse(courseId, isTop).then(res => {
+    console.log(res)
   })
 }
 </script>
