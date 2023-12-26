@@ -9,19 +9,47 @@
     cancel-text="取消"
     v-model="topic"
   >
-    <span> 话题标题 </span
-    ><a-input
+    <a-form ref="formRef" style="width: 170vh; margin: auto; margin-top: 4vh">
+      <a-form-item
+        label="话题标题"
+        :rules="[{ required: true, message: '请输入话题标题!' }]"
+      >
+        <a-input
+          v-model:value="topic.title"
+          style="
+            display: inline-block;
+            margin-right: 7vh;
+            width: 80vh;
+            height: 5vh;
+          "
+          placeholder="请输入内容，最多50字"
+        />
+      </a-form-item>
+      <a-form-item style="width: 92vh">
+        <div style="border: 1px solid #ccc">
+          <Toolbar
+            style="border-bottom: 1px solid #ccc"
+            :editor="editorRef"
+            :defaultConfig="toolbarConfig"
+            :mode="mode"
+          />
+          <Editor
+            style="height: 20vh; overflow-y: hidden"
+            v-model="topic.content"
+            :defaultConfig="editorConfig"
+            :mode="mode"
+            @onCreated="handleCreated"
+          />
+        </div>
+      </a-form-item>
+    </a-form>
+    <!-- <a-input
       v-model:value="topic.title"
+      label="话题标题"
       style="width: 90%"
       placeholder="请输入话题标题"
-    />
-
-    <a-textarea
-      class="context"
-      v-model:value="topic.content"
-      placeholder="话题内容"
-      :rows="6"
-    />
+      :rules="[{ required: true, message: '请输入测试标题!' }]"
+    /> -->
 
     <span class="label">活动类型标签</span>
     <a-input
@@ -32,7 +60,12 @@
     />
     <span class="share">
       <span> 知识共享协议&nbsp;&nbsp;</span>
-      <el-select v-model="topic.shareProtocol" class="m-2" placeholder="Select">
+      <el-select
+        style="width: 30vh"
+        v-model="topic.shareProtocol"
+        class="m-2"
+        placeholder="Select"
+      >
         <el-option
           v-for="item in options1"
           :key="item.dictCode"
@@ -44,7 +77,7 @@
 
     <br />
     <span class="apply">应用环节</span>
-    <el-select v-model="topic.process" placeholder="Select">
+    <el-select v-model="topic.process" placeholder="Select" style="width: 30vh">
       <el-option
         v-for="item1 in options2"
         :key="item1.dictCode"
@@ -55,6 +88,7 @@
 
     <span class="chapter">所属章节&nbsp;&nbsp;</span>
     <el-tree-select
+      style="width: 30vh"
       v-model="topic.chapterName"
       :props="treeProps"
       :data="treeData"
@@ -65,14 +99,17 @@
     />
     <br />
     <span class="btn1">
-      <a-switch v-model:checked="checked1" /><span class="btnContext1"
-        >是否立即发布</span
-      >
+      <a-switch v-if="topic.publishDate == null" v-model:checked="checked1" />
+      <a-switch
+        v-else-if="topic.publishDate != null"
+        v-model:checked="checked3"
+      />
+      <span class="btnContext1">是否立即发布</span>
     </span>
 
-    <div class="hidden" v-if="checked1 == true">
+    <div class="hidden" v-if="checked1 == true || topic.publishDate != null">
       <a-space direction="vertical" :size="12">
-        <span>发布时间</span>
+        <span class="publishDate2">发布时间</span>
         <a-date-picker
           class="publishDate1"
           v-model:value="topic.publishDate"
@@ -121,8 +158,10 @@
 
 <script>
 import { Modal, Button } from "ant-design-vue";
+import { onMounted, ref, shallowRef, onBeforeUnmount } from "vue";
 
-import { onMounted, ref, watch } from "vue";
+import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
+import "@wangeditor/editor/dist/css/style.css"; // 引入 css
 import {
   addTopic,
   getAllChapterById,
@@ -132,10 +171,14 @@ import {
 } from "../../api/topic.js";
 import { userCourseId } from "../../store/index.js";
 import mitter from "../../main.js";
+import dayjs from "dayjs";
+import moment from "moment";
 export default {
   components: {
     "a-modal": Modal,
     "a-button": Button,
+    Toolbar,
+    Editor,
   },
   setup() {
     const options1 = ref([]);
@@ -143,6 +186,7 @@ export default {
     const toCourseId = userCourseId();
     const checked1 = ref(false);
     const checked2 = ref(false);
+    const checked3 = ref(true);
     const showMode = ref(false);
     const courseId = ref();
     const treeData = ref([]);
@@ -150,6 +194,9 @@ export default {
     const type1 = ref("class_share_protoco");
     const type2 = ref("class_process");
     const update = ref(false);
+    const content = "";
+    const mode = "default";
+    const formRef = ref(null);
     const topic = ref({
       topicId: null,
       title: "",
@@ -164,12 +211,19 @@ export default {
       leastReplyNumber: 0,
       chapterName: "",
     });
+
     //接受弹窗开关的传值
     mitter.on("showMode", (data) => {
       showMode.value = data;
     });
     mitter.on("topic", (data) => {
       topic.value = data;
+      if (topic.value.publishDate != null) {
+        topic.value.publishDate = dayjs(topic.value.publishDate);
+      }
+      if (topic.value.deadline != null) {
+        topic.value.deadline = dayjs(topic.value.deadline);
+      }
     });
     mitter.on("update", (data) => {
       update.value = data;
@@ -181,6 +235,9 @@ export default {
       getUserInfo1();
       getDict1();
       getDict2();
+      setTimeout(() => {
+        valueHtml.value = "<p> </p>";
+      }, 1500);
     });
 
     const getDict1 = () => {
@@ -226,7 +283,6 @@ export default {
     };
 
     const handleOk = () => {
-      console.log("值值：" + update.value);
       if (topic.value.title == "" || topic.value.title == null) {
         alert("标题不能为空");
         return;
@@ -236,10 +292,10 @@ export default {
         return;
       }
       if (update.value == false) {
-        console.log("课程id：" + courseId.value);
         addTopic(courseId.value, topic.value, userId.value);
         alert("添加成功");
       } else {
+        topic.value.deadline = dayjs(topic.value.deadline);
         updateTopic(topic.value);
         alert("修改成功");
         update.value = false;
@@ -264,6 +320,28 @@ export default {
     const treeProps = {
       label: "name",
     };
+    const editorChange = (html) => {
+      this.content = html;
+    };
+    // 编辑器实例，必须用 shallowRef
+    const editorRef = shallowRef();
+
+    // 内容 HTML
+    const valueHtml = ref("");
+
+    const toolbarConfig = {};
+    const editorConfig = { placeholder: "请输入内容..." };
+
+    // 组件销毁时，也及时销毁编辑器
+    const onBeforeUnmount = () => {
+      const editor = editorRef.value;
+      if (editor == null) return;
+      editor.destroy();
+    };
+
+    const handleCreated = (editor) => {
+      editorRef.value = editor; // 记录 editor 实例，重要！
+    };
     return {
       topic,
       handleClose,
@@ -271,12 +349,23 @@ export default {
       handleOk,
       checked1,
       checked2,
-      topic,
       treeData,
       options1,
       options2,
       treeProps,
       handleNodeClick,
+      editorChange,
+      content,
+      handleCreated,
+      editorConfig,
+      toolbarConfig,
+      valueHtml,
+      onBeforeUnmount,
+      editorRef,
+      mode,
+      formRef,
+      checked3,
+      moment,
     };
   },
 };
@@ -301,6 +390,7 @@ export default {
 .share {
   position: relative;
   left: 2vh;
+
   margin-right: 1vh;
   margin-top: 1vh;
   margin-bottom: 2vh;
@@ -334,5 +424,20 @@ export default {
 .bottom {
   position: relative;
   bottom: 6vh;
+}
+.label::before {
+  content: "*";
+  color: red;
+  padding: 0.2rem 0.1rem 0.1rem 0.1rem;
+}
+.chapter::before {
+  content: "*";
+  color: red;
+  padding: 0.2rem 0.1rem 0.1rem 0.1rem;
+}
+.publishDate2::before {
+  content: "*";
+  color: red;
+  padding: 0.2rem 0.1rem 0.1rem 0.1rem;
 }
 </style>

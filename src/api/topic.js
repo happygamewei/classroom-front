@@ -52,6 +52,7 @@ export async function postComment(courseId,userId,topicId,comment){
  *添加回复的评论
  */
  export async function replyComment(courseId,userId,topicId,comment,parentId){
+  console.log("comment:"+comment)
   const res=await request.post('/classroom/topic/addTopicReplyComment/'+courseId+'/'+userId+'/'+topicId+'/'+comment+'/'+parentId);
   
 }

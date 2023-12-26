@@ -1,67 +1,71 @@
 <template>
   <span class="totalCount">共有 {{ count }} 个活动</span>
   <a-card :bordered="true" style="width: 166vh">
-    <!-- <a-card v-for="homework in homeworkList" :key="homework.homeworkId">
-      {{ homework.title }} - {{ homework.description }}</a-card> -->
     <a-list item-layout="horizontal">
       <template v-for="item in objects" :key="item.topicId">
-        <a-list-item>
+        <a-list-item class="topic-list">
           <a-list-item-meta>
             <template #title>
-              <span
-                class="title"
-                @click="goToTopicDetail(item.topicId, item.noJoinNumber)"
-              >
-                {{ item.title }}
-              </span>
-
-              <br />
-              <div class="content2" v-if="item.publishDate == null">
-                <span>未发布</span>
-              </div>
-              <div v-else class="content1">
-                截止时间：
-                <span v-if="item.deadline != null">
-                  {{ item.deadline }}
-                </span>
-                <span v-else> 不限 </span>| 已参加
-                <span>{{ item.joinNumber }}</span>
-                | 未参加
-                <span>
-                  {{ item.noJoinNumber }}
-                </span>
-                |评论
-                <span>
-                  {{ item.commentCount }}
-                </span>
-              </div>
-              <div class="issue" v-if="item.publishDate == null">
-                <send-outlined @click="issue(item.topicId)" />发布
-              </div>
-              <div class="more">
-                <el-popover
-                  placement="right"
-                  :width="50"
-                  :height="100"
-                  trigger="click"
+              <div>
+                <span
+                  class="title1"
+                  @click="goToTopicDetail(item.topicId, item.noJoinNumber)"
                 >
-                  <template #reference> <ellipsis-outlined /><br /> </template>
+                  {{ item.title }}
+                </span>
 
-                  <div>置顶</div>
-                  <div>
-                    <span @click="deleteTopic(item.topicId)">删除</span>
-                  </div>
-                  <div><span @click="issue(item.topicId)">编辑</span></div>
-                  <div>移动到章节</div>
-                </el-popover>
+                <br />
+                <div class="content2" v-if="item.publishDate == null">
+                  <span>未发布</span>
+                </div>
+                <div v-else class="content1">
+                  截止时间：
+                  <span v-if="item.deadline != null">
+                    {{ formatDeadline(item.deadline) }}
+                  </span>
+                  <span v-else> 不限 </span>| 已参加
+                  <span>{{ item.joinNumber }}</span>
+                  | 未参加
+                  <span>
+                    {{ item.noJoinNumber }}
+                  </span>
+                  |评论
+                  <span>
+                    {{ item.commentCount }}
+                  </span>
+                </div>
+                <div class="issue" v-if="item.publishDate == null">
+                  <send-outlined @click="issue(item.topicId)" />发布
+                </div>
+                <div class="more">
+                  <p style="font-size: 2vh">更多</p>
+                  <el-popover
+                    placement="right"
+                    :width="50"
+                    :height="100"
+                    trigger="click"
+                  >
+                    <template #reference>
+                      <ellipsis-outlined size="15" /><br />
+                    </template>
+
+                    <div>置顶</div>
+                    <div>
+                      <span @click="deleteTopic(item.topicId)">删除</span>
+                    </div>
+                    <div><span @click="issue(item.topicId)">编辑</span></div>
+                    <div>移动到章节</div>
+                  </el-popover>
+                </div>
               </div>
             </template>
             <template #avatar>
               <a-avatar
-                :size="size"
+                :size="40"
                 src="src/assets/image/Topics.png"
+                class="avatar"
               ></a-avatar>
-              <p>话题</p>
+              <p style="font-size: large">话题</p>
             </template>
           </a-list-item-meta>
         </a-list-item>
@@ -83,6 +87,7 @@ import { userCourseId } from "../../store/index.js";
 import { useRouter } from "vue-router";
 import { EllipsisOutlined, SendOutlined } from "@ant-design/icons-vue";
 import mitter from "../../main.js";
+import { nextTick } from "vue";
 
 export default {
   components: {
@@ -99,10 +104,14 @@ export default {
     const showMode = ref(true);
     const key = ref(0);
     const count = ref(0);
+    const option = ref();
 
     mitter.on("checked", (data) => {
       isPost.value = data;
-      console.log("data----:" + isPost.value);
+    });
+    mitter.on("option-selected", (data) => {
+      option.value = data;
+      getAllTopics(courseId, option.value);
     });
     // mitter.on("refresh", (data) => {
     //   console.log("更新前：" + key.value);
@@ -111,7 +120,7 @@ export default {
     // });
     onMounted(() => {
       courseId.value = toCourseId.getCourseId();
-      getAllTopics(courseId);
+      getAllTopics(courseId, option.value);
       getUserInfo1();
       getTopicCount(courseId);
     });
@@ -129,10 +138,41 @@ export default {
      * @param courseId
      * 获取参加这个课程的所有话题
      */
-    const getAllTopics = (courseId) => {
+    const getAllTopics = (courseId, option) => {
+      console.log("排序选择：" + option);
       getList(courseId.value).then((res) => {
+        switch (option) {
+          case 1:
+            res.sort(
+              (a, b) => new Date(a.publishDate) - new Date(b.publishDate)
+            );
+            console.log("1111");
+
+            break;
+
+          case 2:
+            res.sort(
+              (a, b) => new Date(b.publishDate) - new Date(a.publishDate)
+            );
+            console.log("2222");
+
+            break;
+          case 3:
+            res.sort((a, b) => a.title.localeCompare(b.title));
+            console.log("3333");
+
+            break;
+          case 4:
+            res.sort((a, b) => b.title.localeCompare(a.title));
+            console.log("4444");
+
+            break;
+          default:
+            break;
+        }
         objects.value = res;
       });
+      console.log(objects.value);
     };
     const getUserInfo1 = () => {
       getUserInfo().then((res) => {
@@ -147,7 +187,6 @@ export default {
       const topic = getDetail(topicId);
       topic.then((data) => {
         mitter.emit("topic", data);
-        console.log("添加开关！！！！----" + data + "," + topicId);
       });
       mitter.emit("showMode", showMode.value);
       mitter.emit("update", true);
@@ -166,6 +205,18 @@ export default {
         },
       });
     };
+    const formatDeadline = (deadline) => {
+      const dateTime = new Date(deadline);
+      const formattedDateTime = dateTime.toLocaleString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
+      return formattedDateTime;
+    };
     return {
       objects,
       userId,
@@ -175,21 +226,22 @@ export default {
       issue,
       key,
       count,
+      formatDeadline,
     };
   },
 };
 </script>
 
-<style>
-.title {
+<style scoped>
+.title1 {
   font-family: 楷书;
-  font-size: medium;
-  margin-left: -120vh;
+  font-weight: bolder;
+  font-size: 22px;
 }
 .content1 {
-  margin-top: 4vh;
-  margin-left: -105vh;
-  font-size: smaller;
+  font-size: 13px;
+  padding-top: 5vh;
+  margin-left: 10vh;
 }
 .content2 {
   margin-top: 4vh;
@@ -208,5 +260,8 @@ export default {
   position: relative;
   left: -70vh;
   top: -8vh;
+}
+.topic-list {
+  padding-bottom: 2vh;
 }
 </style>
