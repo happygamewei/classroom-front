@@ -1,15 +1,16 @@
 <template>
 <div style="float: left;">共{{ num }}个活动</div>
-<div style="margin-right: 18vh;"><el-button @click="addtest" style="width: 17vh; height: 5vh;" class="a" type="success" round><PlusOutlined />添加测试</el-button></div>
-<div class="a" style="margin-top: 1vh;">
+<div v-if="roles == 'admin'" style="margin-right: 18vh;"><el-button @click="addtest" style="width: 17vh; height: 5vh;" class="a" type="success" ><PlusOutlined />添加测试</el-button></div>
+
+<div v-if="roles == 'admin'" class="a">  <el-button type="primary" style="width: 17vh; height: 5vh;"><CheckOutlined />批量操作</el-button> </div>
+<div v-if="roles == 'admin'" class="a" style="margin-top: 1vh;">
   <DownloadOutlined /><p style="float: right;">&nbsp 下载所有测试</p>
 </div>
-<div class="a">  <el-button style="width: 17vh; height: 5vh;"><CheckOutlined />批量操作</el-button> </div>
 
 
-<div class="a" style=" color: rgb(83, 133, 250); margin-top: 1vh;">
+<div v-if="roles == 'admin'" class="a"  style=" color: rgb(83, 133, 250); margin: 1vh 0vh 0vh 20vh;">
   <a-dropdown>
-    <a class="ant-dropdown-link" @click.prevent style=" color: rgb(83, 133, 250); margin-top: 1vh;">
+    <a class="ant-dropdown-link" @click.prevent style=" color: rgb(83, 133, 250); margin: 1vh 0vh 0vh 20vh;">
       <OrderedListOutlined />
       &nbsp 排序
     </a>
@@ -31,11 +32,12 @@
     </template>
   </a-dropdown>
 </div>
-
 <Card style="margin-top: 6vh; width: 159vh;">
   <Card style="border: none;">
     <a-list item-layout="horizontal">
-    <template v-for="item in TestList" :key="testId">
+
+
+    <template v-if="roles == 'admin'" v-for="item in TestList" :key="testId">
       <a-list-item>
         <a-list-item-meta
           description=" ">
@@ -80,7 +82,6 @@
                   </template>
                 </a-dropdown>
                 </div>
-
                 <div style="float: right; margin: 2vh 0vh 0vh 6vh;">
                   <a-divider type="vertical" style="height: 60px; background-color: rgb(215, 215, 215)" />
                   <a-divider type="vertical" style="height: 60px; border-color: rgb(215, 215, 215)" dashed />
@@ -91,11 +92,7 @@
                     <SendOutlined />
                   </div>
                   <p>发布</p></div>
-
-
             </div>
-
-
               <div v-if="item.publishDate != null" style="margin-left: 38vh; width: 75vh; height: 15vh; display: inline-block; position: absolute;">
                 <div style="float: left; margin-top: 1.25vh;cursor: pointer;">
                   <div class="change" style="font-size: 3vh;">
@@ -146,7 +143,7 @@
 
                   <p>未交</p>
                 </div>
-                <div style="float: left; margin: 2vh 0vh 0vh 6vh;">
+                <div style="float: left; margin: 2vh 0vh 0vh 1vh;">
                   <a-divider type="vertical" style="height: 60px; background-color: rgb(215, 215, 215)" />
                   <a-divider type="vertical" style="height: 60px; border-color: rgb(215, 215, 215)" dashed />
                 </div>
@@ -253,10 +250,32 @@
                       <a-form-item
                         label="章节目录"
                         name="chapterId">
-                        <a-select v-model:value="testForm.chapterId" style="width: 35vh;" placeholder="请选择">
-                          <a-select-option value="demo"></a-select-option>
-                          <a-select-option value="demo"></a-select-option>
-                        </a-select>
+                        <el-tree-select
+                          v-model="testForm.chapterId"
+                          style="width: 35vh;"
+                          placeholder="请选择"
+                          :data="treeData"
+                          node-key="chapterId"
+                          :render-after-expand="false"
+                          :props="treeProps"
+                        >
+                        </el-tree-select>
+                        <template #overlay>
+                          <a-menu>
+                            <a-menu-item>1st menu item</a-menu-item>
+                            <a-menu-item>2nd menu item</a-menu-item>
+                            <a-sub-menu key="sub1" title="sub menu">
+                              <a-menu-item>3rd menu item</a-menu-item>
+                              <a-menu-item>4th menu item</a-menu-item>
+                            </a-sub-menu>
+                            <a-sub-menu key="sub2" title="disabled sub menu" disabled>
+                              <a-menu-item>5d menu item</a-menu-item>
+                              <a-menu-item>6th menu item</a-menu-item>
+                            </a-sub-menu>
+                          </a-menu>
+                        </template>
+
+
                       </a-form-item>
                     </b>
                     </div>
@@ -322,26 +341,49 @@
                       </a-form-item>
                         </b>
                       </div>
-
-
                     </a-form>
                   </a-modal>
-
-
-
               </div>
-
             </div>
             </div>
 
           </template>
           <template #avatar>
-            <a-avatar style="width: 8vh; height: 8vh ;" src="src/assets/image/1.png" />
+            <a-avatar style="width: 8vh; height: 8vh ;" src="src/assets/image/Testlogo.png" />
             <p style="margin-top: 1vh; width: 7vh;margin-left: 0.5vh; ">测试</p>
           </template>
         </a-list-item-meta>
       </a-list-item>
     </template>
+
+    <template v-if="roles == 'common'" v-for="item in TestList" :key="testId">
+      <a-list-item v-if="item.publishDate != null">
+        <a-list-item-meta
+          description=" ">
+          <template #title>
+            <div @click="testContent(item.testId)" style="height: 12vh;width: 28vh;cursor: pointer;">
+              <a  style=" font-size: large;width: 10vh; margin: 2vh 0vh 0vh 3vh; float: left;color: black;">{{ item.title }}</a>
+            <div style="float: left; position: absolute;">
+              <p style="display: inline-block; margin: 7vh 2vh 0vh 3vh;">截至时间:
+                <p style="display: inline-block;" v-if="item.deadline==null"> &nbsp不限 &nbsp</p>
+                <p style="display: inline-block;">{{ item.deadline }}</p> &nbsp|</p>
+              <p style="display: inline-block;" v-if="item.testLabel==1">普通测试</p>
+              <p style="display: inline-block;" v-if="item.testLabel==2">考试</p>
+            </div>
+            <div style="display: inline-block; position: absolute;margin:4vh 0vh 0vh 98vh; ">
+              <a-button style="height: 5vh;width: 15vh;">查看试卷</a-button>
+            </div>
+            </div>
+
+          </template>
+          <template #avatar>
+            <a-avatar style="width: 8vh; height: 8vh ;" src="src/assets/image/Testlogo.png" />
+            <p style="margin-top: 1vh; width: 7vh;margin-left: 0.5vh; ">测试</p>
+          </template>
+        </a-list-item-meta>
+      </a-list-item>
+    </template>
+
   </a-list>
 
   </Card>
@@ -350,26 +392,30 @@
 </template>
 <script lang="ts" setup>
 import { onMounted, ref, shallowRef,onBeforeUnmount,createVNode} from 'vue';
-import { OrderedListOutlined,DownloadOutlined,
-  PlusOutlined,EyeOutlined,CustomerServiceOutlined,ClockCircleOutlined,EllipsisOutlined,QuestionOutlined,CheckOutlined,
+import { OrderedListOutlined,DownloadOutlined,PlusOutlined,EyeOutlined,
+  CustomerServiceOutlined,ClockCircleOutlined,EllipsisOutlined,QuestionOutlined,CheckOutlined,
   ExclamationCircleOutlined,SendOutlined } from '@ant-design/icons-vue';
 import { Card,Modal,notification,NotificationPlacement,TreeSelectProps } from 'ant-design-vue';
 import axios from 'axios';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
 import { useRoute,useRouter } from 'vue-router';
-import { getAllTest,GetNotCorrected,DeleteTest,EditTest,SelectTest } from '../../../api/test.js';
+import { getAllTest,GetNotCorrected,DeleteTest,EditTest,SelectTest,getAllChapters,getAllChapterById } from '../../../api/test.js';
 import dayjs, { Dayjs } from 'dayjs';
+import {getRoles, getUserId} from '../../../utils/user-utils.js';
+import { userCourseId } from "../../../store/index.js";
 
 const route = useRoute();
 const num = ref(0)
 const TestList = ref()
+const ChapterList = ref()
 const NotCorrected = ref()
+const roles = ref()
 const testid = route.query.testid
 const router = useRouter();
-
+const courseId = ref();
 const open = ref<boolean>(false);
-
+  const toCourseId = userCourseId();
   const dateFormat = 'YYYY-MM-DD HH:mm:ss';
   const publish_date = ref<Dayjs>(dayjs(new Date()));
 
@@ -412,8 +458,17 @@ const testForm = ref({
     publishDate:'',
     deadline:'',
   })
+  const treeProps = {
+      label: "name",
+    };
 
-onMounted(() => {
+onMounted(async () => {
+courseId.value = toCourseId.getCourseId();
+roles.value = getRoles()
+console.log(roles.value+"222")
+getAllChapterById(courseId.value).then((res) =>{
+  treeData.value = res
+})
   getAllTest().then((res) => {
   TestList.value = res;
   console.log(res)
@@ -428,6 +483,9 @@ if (testid !== undefined) {
   })
 }
 })
+
+
+
 const addtest = () =>{
   router.push({
     name:'AddTest',
@@ -444,7 +502,6 @@ const testContent = (testId) =>{
 
 const Edit = (id) =>{
     open.value = true;
-
     SelectTest(id)
     .then((response) =>{
       console.log(response.data)
