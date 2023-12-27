@@ -62,12 +62,40 @@ export async function SelectTest(id){
     }
 
     return Promise.reject(new Error(res.msg))
-
-
     // return request({
     //     url:'/classroom/test/selectTest/'+id,
     //     method:'post',
     //     data: id
     // })
 }
+
+//获得所有章节
+export async function getAllChapters(){
+    const res = await request.get("/classroom/chapter/list")
+
+    if(res.code === 200){
+        return res.rows
+    }
+    return Promise.reject(new Error(res.msg));
+}
+
+//查询用户身份
+export async function CheckRole(id){
+    const res = await request.post("/classroom/test/CheckRole"+id)
+
+    if(res.code === 200){
+        return res.rows
+    }
+    return Promise.reject(new Error(res.msg));
+}
+/**
+ * 查找这个课程所有的章节
+ */
+export async function getAllChapterById(courseId){
+    const res=await request.get('classroom/topic/byCourseId/'+courseId)
+    console.log("章节信息："+res)
+    if(res.code==200)
+    return res.data
+  return Promise.reject(new Error(res.Error));
+  }
 

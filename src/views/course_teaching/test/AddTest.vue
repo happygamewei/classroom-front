@@ -75,7 +75,7 @@
                   <a-tree-select
                     v-model:value="testForm.shareProtocol"
                     style="width: 33vh;"
-                    :tree-data="treeData"
+                    :tree-data="treeData1"
                     placeholder="请选择" />
                     <p style="display: inline-block; font-size:larger"> &nbsp &nbsp</p>
                     <QuestionOutlined />
@@ -84,15 +84,19 @@
 
               <div style="position: absolute; margin: 8vh 0vh 5vh 4vh;">
               <b>
-              <a-form-item
-                label="所属章节"
-                name="chapterId">
-                <a-select v-model:value="testForm.chapterId" style="width: 35vh;" placeholder="请选择">
-                  <a-select-option value="demo"></a-select-option>
-                  <a-select-option value="demo"></a-select-option>
-                </a-select>
-              </a-form-item>
-            </b>
+                <a-form-item label="所属章节" name="chapterId">
+                  <el-tree-select
+                    v-model="testForm.chapterId"
+                    style="width: 35vh;"
+                    placeholder="请选择"
+                    :data="treeData"
+                    node-key="chapterId"
+                    :render-after-expand="false"
+                    :props="treeProps"
+                  >
+                  </el-tree-select>
+                </a-form-item>
+              </b>
             </div>
 
             <div style="position: absolute; margin: 8vh 0vh 5vh 70vh;">
@@ -219,18 +223,22 @@
         @onCreated="handleCreated"
       />
     </div>
-    <div style="position: absolute; margin: 5vh 120vh 0vh 0vh;">
-      <b>
-      <a-form-item
-        label="所属章节"
-        name="chapterId">
-        <a-select v-model:value="testForm.chapterId" style="width: 35vh;" placeholder="请选择">
-          <a-select-option value="demo"></a-select-option>
-          <a-select-option value="demo"></a-select-option>
-        </a-select>
-      </a-form-item>
-    </b>
-    </div>
+    <div style="position: absolute; margin: 5vh 0vh 5vh 4vh;">
+              <b>
+                <a-form-item label="所属章节" name="chapterId">
+                  <el-tree-select
+                    v-model="testForm.chapterId"
+                    style="width: 35vh;"
+                    placeholder="请选择"
+                    :data="treeData"
+                    node-key="chapterId"
+                    :render-after-expand="false"
+                    :props="treeProps"
+                  >
+                  </el-tree-select>
+                </a-form-item>
+              </b>
+            </div>
     <div style="position: absolute; margin: 5vh 0vh 0vh 53vh;">
       <b>
       <a-form-item
@@ -251,7 +259,7 @@
         <a-tree-select
           v-model:value="testForm.shareProtocol"
           style="width: 40vh;"
-          :tree-data="treeData"
+          :tree-data="treeData1"
           placeholder="请选择" />
           <p style="display: inline-block; font-size:larger"> &nbsp &nbsp</p>
           <QuestionOutlined />
@@ -367,32 +375,53 @@
           UnorderedListOutlined,FileSearchOutlined,CalculatorOutlined,ControlOutlined,
           MenuUnfoldOutlined,ExclamationCircleOutlined} from '@ant-design/icons-vue';
   import { useRouter } from 'vue-router';
+  import {userCourseId} from "../../../store/index.js";
   import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
   import '@wangeditor/editor/dist/css/style.css' // 引入 css
-  import { AddTest } from "../../../api/test"
+  import { AddTest,getAllChapterById } from "../../../api/test"
   import axios from 'axios';
   import dayjs, { Dayjs } from 'dayjs';
   import moment from 'moment'
+  import { getUserId } from '../../../utils/user-utils';
 
+  const toCourseId = userCourseId()
+  const id = ref()
   const current = ref<number>(0);
   const value = ref<number>(1);
   const formRef=ref(null)
   const router = useRouter();
   const open = ref<boolean>(false);
-  const deadline = ref()
-  const dateFormat = 'YYYY-MM-DD HH:mm:ss';
-  const publishDate = ref<Dayjs>(dayjs(new Date()));
+  const treeData = ref([]);
+  const userId = getUserId();
+  const courseId = ref();
     const testForm = ref({
     title: '',
     chapterId:'',
+    userId:userId,
     typeLabel:'测试',
     shareProtocol:'',
     testLabel:1,
     process:'',
     publishDate:'',
     deadline:'',
+    course_id:courseId.value,
   })
-
+// 模拟 ajax 异步获取内容
+onMounted(() => {
+    setTimeout(() => {
+        valueHtml.value = '<p> </p>'
+    }, 1500)
+    id.value =  toCourseId.getCourseId()
+    testForm.value.course_id = id.value
+    courseId.value = toCourseId.getCourseId();
+    console.log(courseId.value+"555")
+    getAllChapterById(courseId.value).then((res) =>{
+    treeData.value = res
+})
+})
+    const treeProps = {
+      label: "name",
+    };
 
 const onChange = (value,dateString) => {
   console.log('Selected Time: ', value)
@@ -424,13 +453,6 @@ const disabledDateTime = () => {
       };
     }
 
-// 模拟 ajax 异步获取内容
-onMounted(() => {
-    setTimeout(() => {
-        valueHtml.value = '<p> </p>'
-    }, 1500)
-})
-
 
   const next = () => {
     console.log(current.value)
@@ -461,12 +483,14 @@ const handleOk = (e: MouseEvent) => {
           testForm.value = {
             title: '',
             chapterId:'',
+            userId:userId,
             typeLabel:'测试',
             shareProtocol:'',
             testLabel:1,
             process:'',
             publishDate:'',
             deadline:'',
+            course_id:courseId.value,
           };
         })
         location.reload();
@@ -490,7 +514,7 @@ const handleOk = (e: MouseEvent) => {
 ]);
 
 
-  const treeData = ref<TreeSelectProps['treeData']>([
+  const treeData1 = ref<TreeSelectProps['treeData']>([
   { id: 1, pId: 0, value: '1', title: '不使用' },
   { id: 2, pId: 0, value: '2', title: '署名（CC-BY）' },
   { id: 3, pId: 0, value: '3', title: '署名-相同方式共享（CC-BY-SA）' },

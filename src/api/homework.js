@@ -9,9 +9,9 @@ export async function fetchHomeworkData() {
     return Promise.reject(new Error(res?.msg));
 }
 export async function addHomeworkT(data) {
-    const res = await request.post('/classroom/homework', data)
-    if(res.code === 200){
-        return res?.msg
-    }
-    return Promise.reject(new Error(res.msg));
+    return request({
+        url: '/classroom/homework/AddHomework',
+        method: 'post',
+        data: data
+    })
 }
