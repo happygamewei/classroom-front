@@ -110,6 +110,7 @@ const router = useRouter();
 
 //跳转到课程详细页面
 const toClassDetail = (courseId) => {
+  console.log("courseId=====>", courseId)
   router.push({
     name: 'ClassDetail',
     query: {courseId}
