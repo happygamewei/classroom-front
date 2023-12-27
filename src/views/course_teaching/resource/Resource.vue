@@ -261,7 +261,7 @@
         </a-list>
       </a-card>
     </div>
-<!--    <AddOrEditResource v-if="openSelect1" :openCreate="openSelect1" @updateOpenAdd="updateOpen"/>-->
+    <AddOrEditResource v-if="openSelect1" :openCreate="openSelect1" @updateOpenAdd="updateOpen"/>
   </div>
 
 </template>
@@ -283,7 +283,7 @@ import {getChapterByCourse} from "../../../api/chapter.js";
 import {addResourceInfo,getResourceList,deleteResourceById} from "../../../api/resource.js";
 import {getInfo} from "../../../api/login.js"
 import {ElMessage} from "element-plus";
-import {Modal, notification, NotificationPlacement, CascaderProps} from "ant-design-vue";
+import {Modal, notification, NotificationPlacement} from "ant-design-vue";
 import AddOrEditResource from "@/components/resource/AddOrEditResource.vue";
 
 const toCourseId = userCourseId()
@@ -305,7 +305,10 @@ onMounted(()=>{
     classTypeList.value = res;
   })
   getInfo().then(res =>{
+    console.log(res)
     createBy.value = res.user.createBy
+    console.log(createBy.value);
+    // console.log(res.user.userId)
   })
   getResourceByCourseInfo(id.value)
   // console.log("当前时间"+formattedTime)

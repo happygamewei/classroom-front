@@ -284,9 +284,11 @@ export default {
     };
 
     const handleOk = () => {
-      console.log("topic.value.content" + topic.value.content);
+      console.log("用户角色：" + userRole);
+      if (userRole.value == "common") topic.value.publishDate = new Date();
+      console.log("时间：" + topic.value.publishDate);
       topic.value.content = removeHtmlTags(topic.value.content);
-      console.log("topic.value.content" + topic.value.content);
+
       if (topic.value.title == "" || topic.value.title == null) {
         alert("标题不能为空");
         return;
