@@ -96,7 +96,7 @@
   </a-card>
   
 
-  <!-- 添加作业 -->
+  <!-- 添加作业或修改发布作业对话框 -->
   <template>
     <a-modal v-model:open= "displayAdd" :title="homeTitle" @ok="handleOk" width="70vw" cancelText="取消" okText="确定">
       <a-card >
@@ -111,9 +111,9 @@
             </a-radio-group>
           </a-form-item>
           <a-form-item :label="homeTitle" :rules="[{ required: true, message: '作业标题' }]">
-            <a-input size="large" style="width: 30vw" placeholder="请输入名称"  />
+            <a-input v-model="addFormState.title" size="large" style="width: 30vw" placeholder="请输入作业标题"  />
           </a-form-item>
-          <a-form-item name="content"   :rules="[{ required: true, message: '请输入内容!'}]"
+          <a-form-item name="content" v-model="addFormState.content"   :rules="[{ required: true, message: '请输入作业内容!'}]"
               style="margin-left: 4vw;">
             <RichText />
           </a-form-item>
@@ -121,45 +121,32 @@
           <a-card>
             <div style="display: flex;">
               <a-form-item label="活动内容标签" style="flex: 1; margin-right: 20px;">
-                <a-input size="large" placeholder="作业" />
+                <a-input v-model="addFormState.typeLabel" size="large" placeholder="作业" />
               </a-form-item>
-
-              <a-form-item label="知识共享协议" style="flex: 1;">
-                <a-dropdown :trigger="['click']">
-                  <a class="ant-dropdown-link" @click.prevent>
-                  <a-input size="large" placeholder="不使用" />
-                    <DownOutlined />
-                  </a>
-
-                <template #overlay>
-                  <a-menu>
-                    <a-menu-item key="0">
-                      <a href="">署名（CC-BY）</a>
-                    </a-menu-item>
-                    <a-menu-item key="1">
-                      <a href="">署名-相同方式共享（CC-BY—SA）</a>
-                    </a-menu-item>
-                    <a-menu-item key="1">
-                      <a href="">署名-非商业（CC-BY—NC）</a>
-                    </a-menu-item>
-                    <a-menu-item key="1">
-                      <a href="">署名-禁止演绎（CC-BY—ND）</a>
-                    </a-menu-item>
-                    <a-menu-item key="1">
-                      <a href="">署名-非商业-禁止演绎（CC-BY—NC-ND）</a>
-                    </a-menu-item>
-                    <a-menu-item key="1">
-                      <a href="">署名-非商业-相同方式共享（CC-BY—NC-SA）</a>
-                    </a-menu-item>
-                  </a-menu>
-                </template>
-                </a-dropdown>
-              </a-form-item>
+                <div style="flex: 1;">
+                    <a-form-item
+                            label="知识共享协议"
+                            name="shareProtocol"
+                            placeholder="不使用"
+                    >
+                        <a-tree-select
+                                v-model:value="addFormState.shareProtocol"
+                                style="width: 33vh;"
+                                :tree-data="treeData"
+                                placeholder="请选择" />
+                        <p style="display: inline-block; font-size:larger"> &nbsp &nbsp</p>
+                        <QuestionOutlined />
+                    </a-form-item>
+                </div>
             </div>
             <div style="display: flex;">
-              <a-form-item label="应用环节" style="flex: 1; margin-right: 20px;">
-                <a-input size="large" placeholder="请选择" />
-              </a-form-item>
+                <a-form-item label="应用环节" name="process">
+                    <a-tree-select
+                            v-model:value="addFormState.process"
+                            style="width: 33vh;"
+                            :tree-data="Process"
+                            placeholder="请选择" />
+                    </a-form-item>
               <a-form-item label="所属章节" style="flex: 1; margin-right: 20px;">
                 <a-input size="large" placeholder="请选择" />
               </a-form-item>
@@ -168,21 +155,64 @@
 
           <a-form-item  name="delivery" style="margin-left: 4vw;">
             <a-switch v-model:checked="delivery" />
-            <scan style="color: rgba(255, 68, 0, 0.829);font-size: 18px;">是否立即发布</scan>
+            <scan style="border:none;color: rgba(255, 68, 0, 0.829);font-size: 18px;">是否立即发布</scan>
           </a-form-item>
           </a-form>
+          <div style="margin-left: 4vw;padding-left:1vw;display: flex;background-color: rgba(218,220,224,0.22)" v-if="delivery ? true : false">
+              <el-form-item label="发布时间" style="margin-top: 2vh;" prop="publishDate">
+                  <el-date-picker clearable
+                                  v-model="addFormState.publishDate"
+                                  type="datetime"
+                                  placeholder="请选择发布时间">
+                  </el-date-picker>
+              </el-form-item>
+              <el-form-item style="margin-left: 4vw;margin-top: 2vh;" label="截至时间" prop="deadline">
+                  <el-date-picker clearable
+                                  v-model="addFormState.deadline"
+                                  type="datetime"
+                                  placeholder="请选择截至时间">
+                  </el-date-picker>
+              </el-form-item>
+          </div>
+          <div style="margin-left: 4vw;padding-left:1vw;background-color: rgba(218,220,224,0.22)" v-if="delivery ? true : false">
+              <el-form-item label="总分" prop="totalScore">
+                  <el-input style="width: 4vw" v-model="addFormState.totalScore" placeholder="请输入总分" />
+              </el-form-item>
+              <a-form-item  name="isCheck" >
+                  <a-switch v-model:checked="isCheck" />
+                  <scan style="border:none;color: rgba(94,149,210,0.83);font-size: 18px;">进行查重</scan>
+              </a-form-item>
+              <div style="display: flex;" v-if="isCheck ? true : false">
+                  <el-form-item label="查重警戒值" prop="checkNumber">
+                      <el-input style="width: 3vw" v-model="addFormState.checkNumber"  />
+                      <span>%</span>
+                  </el-form-item>
+                  <a-form-item style="margin-left: 4vw;"  name="isCheck" >
+                      <a-switch v-model:checked="ifBack" />
+                      <scan style="border:none;font-size: 18px;">自动打回</scan>
+                  </a-form-item>
+              </div>
+          </div>
         </a-card>
     </a-modal>
   </template>
 </template>
 <script setup lang="ts">
-import { SortAscendingOutlined,CheckSquareOutlined,DownloadOutlined,AppstoreAddOutlined,SendOutlined,EllipsisOutlined } from '@ant-design/icons-vue';
+import {
+    SortAscendingOutlined,
+    CheckSquareOutlined,
+    DownloadOutlined,
+    AppstoreAddOutlined,
+    SendOutlined,
+    EllipsisOutlined,
+    QuestionOutlined, ExclamationCircleOutlined
+} from '@ant-design/icons-vue';
 import type { SizeType } from 'ant-design-vue/es/config-provider';
 import type { FormInstance } from 'ant-design-vue';
-import { onMounted, reactive, ref } from 'vue';
-import {fetchHomeworkData} from "../../../api/homework.js";
+import {createVNode, onMounted, reactive, ref} from 'vue';
+import {fetchHomeworkData,addHomeworkT} from "../../../api/homework.js";
 import RichText from '../../../components/RichText.vue';
-// import  AddHomework from './AddHomework.vue';
+import {Modal, notification, TreeSelectProps} from "ant-design-vue";
 
 
 //变量
@@ -254,6 +284,24 @@ const homeTitle = ref('添加作业')
 const displayAdd = ref(false)
 const resource = ref()
 const delivery = ref()
+const isCheck = ref()
+const ifBack = ref()
+const treeData = ref<TreeSelectProps['treeData']>([
+    { id: 1, pId: 0, value: '1', title: '不使用' },
+    { id: 2, pId: 0, value: '2', title: '署名（CC-BY）' },
+    { id: 3, pId: 0, value: '3', title: '署名-相同方式共享（CC-BY-SA）' },
+    { id: 4, pId: 0, value: '4', title: '署名-非商业（CC-BY-NC）' },
+    { id: 5, pId: 0, value: '5', title: '署名-禁止演绎（CC-BY-ND）' },
+    { id: 6, pId: 0, value: '6', title: '署名-非商业-禁止演绎（CC-BY-NC-ND）' },
+    { id: 7, pId: 0, value: '7', title: '署名-非商业-相同方式共享（CC-BY-NC-SA）' },
+]);
+const Process = ref<TreeSelectProps['treeData']>([
+    { id: 1, pId: 0, value: '1', title: '课前' },
+    { id: 2, pId: 0, value: '2', title: '课中' },
+    { id: 3, pId: 0, value: '3', title: '课后' },
+    { id: 4, pId: 0, value: '4', title: '期中' },
+    { id: 5, pId: 0, value: '5', title: '期末' },
+]);
 const addFormState = reactive<Homework>({
   homeworkId: 0,
   title: '',
@@ -279,12 +327,31 @@ const addFormState = reactive<Homework>({
   updateTime:  '',
   remark: '',
 })
-
 const addHomework = () => {
   homeTitle.value = '添加作业';
   resource.value = [{ required: true, message: ' ', trigger: 'change' }]
   delivery.value = false;
   displayAdd.value = true;
+  isCheck.value = false;
+  ifBack.value = false;
+
+    Modal.confirm({
+        title: '提示',
+        icon: createVNode(ExclamationCircleOutlined),
+        content: '确定删除本次测试吗？',
+        onOk() {
+            addHomeworkT(addFormState).then((res)=>{
+                this.open = false;
+                console.log(res)
+            })
+            location.reload();
+            return new Promise((resolve, reject) => {
+                setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+            }).catch(() => console.log('Oops errors!'));
+
+        },
+        onCancel() {},
+    });
 }
 
 

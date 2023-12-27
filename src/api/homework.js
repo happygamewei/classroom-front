@@ -8,8 +8,8 @@ export async function fetchHomeworkData() {
     }
     return Promise.reject(new Error(res?.msg));
 }
-export async function addHomework(data) {
-    const res = await request.post('/classroom/chapter', data)
+export async function addHomeworkT(data) {
+    const res = await request.post('/classroom/homework', data)
     if(res.code === 200){
         return res?.msg
     }
