@@ -261,7 +261,7 @@
         </a-list>
       </a-card>
     </div>
-    <AddOrEditResource v-if="openSelect1" :openCreate="openSelect1" @updateOpenAdd="updateOpen"/>
+<!--    <AddOrEditResource v-if="openSelect1" :openCreate="openSelect1" @updateOpenAdd="updateOpen"/>-->
   </div>
 
 </template>

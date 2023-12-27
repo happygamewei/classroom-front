@@ -7,6 +7,7 @@ import TestContent from "../views/course_teaching/test/TestContent.vue"
 
 import NoticeDetail from "../views/course_teaching/notice/NoticeDetail.vue";
 import NoticeDialog from "../views/course_teaching/notice/NoticeDialog.vue";
+import ClassDetail from "@/views/ClassDetail.vue";
 import Login from "../views/login.vue"
 import {getToken} from "@/utils/token-utils.js";
 import {WHITE_LIST,LAYOUT_PATH } from "@/config/setting.js";
@@ -29,7 +30,7 @@ const routes = [
     {
         path: '/classDetail',
         name: 'ClassDetail',
-        component: () => import("../views/ClassDetail.vue"),
+        component: ClassDetail,
         meta: {
             title: '课程内容'
         }
