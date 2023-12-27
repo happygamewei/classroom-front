@@ -38,7 +38,7 @@
 
 
     <template v-if="roles == 'admin'" v-for="item in TestList" :key="testId">
-      <a-list-item>
+      <a-list-item v-if="item.course_id == courseId">
         <a-list-item-meta
           description=" ">
           <template #title>
@@ -54,7 +54,6 @@
 
             <div v-if="item.publishDate == null" style="margin-left: 38vh; width: 75vh; height: 15vh; display: inline-block; position: absolute;">
                 <div class="ant-dropdown-link" @click.prevent  style="float: right;margin-top: 1.25vh;cursor: pointer;">
-
                   <a-dropdown>
                   <a style="color: black;">
                     <div class="change" style="font-size: 3vh;">
@@ -349,7 +348,7 @@
 
           </template>
           <template #avatar>
-            <a-avatar style="width: 8vh; height: 8vh ;" src="src/assets/image/Testlogo.png" />
+            <a-avatar style="width: 7vh; height: 7vh ;" src="/src/assets/image/Testlogo.png" />
             <p style="margin-top: 1vh; width: 7vh;margin-left: 0.5vh; ">测试</p>
           </template>
         </a-list-item-meta>
@@ -400,24 +399,21 @@ import axios from 'axios';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
 import { useRoute,useRouter } from 'vue-router';
-import { getAllTest,GetNotCorrected,DeleteTest,EditTest,SelectTest,getAllChapters,getAllChapterById } from '../../../api/test.js';
-import dayjs, { Dayjs } from 'dayjs';
-import {getRoles, getUserId} from '../../../utils/user-utils.js';
+import { getAllTest,GetNotCorrected,DeleteTest,EditTest,SelectTest,getAllChapterById } from '../../../api/test.js';
+import {getRoles} from '../../../utils/user-utils.js';
 import { userCourseId } from "../../../store/index.js";
 
 const route = useRoute();
 const num = ref(0)
 const TestList = ref()
-const ChapterList = ref()
 const NotCorrected = ref()
 const roles = ref()
 const testid = route.query.testid
 const router = useRouter();
 const courseId = ref();
 const open = ref<boolean>(false);
-  const toCourseId = userCourseId();
-  const dateFormat = 'YYYY-MM-DD HH:mm:ss';
-  const publish_date = ref<Dayjs>(dayjs(new Date()));
+const toCourseId = userCourseId();
+const dateFormat = 'YYYY-MM-DD HH:mm:ss';
 
 
 
@@ -457,6 +453,7 @@ const testForm = ref({
     process:'',
     publishDate:'',
     deadline:'',
+    course_id:'',
   })
   const treeProps = {
       label: "name",
@@ -465,13 +462,13 @@ const testForm = ref({
 onMounted(async () => {
 courseId.value = toCourseId.getCourseId();
 roles.value = getRoles()
-console.log(roles.value+"222")
+console.log(courseId.value+"222")
 getAllChapterById(courseId.value).then((res) =>{
   treeData.value = res
 })
   getAllTest().then((res) => {
   TestList.value = res;
-  console.log(res)
+  console.log(res+"0000000")
   num.value = res.length;
   setTimeout(() => {
         valueHtml.value = '<p> </p>'
@@ -530,6 +527,7 @@ const handleOk = (e: MouseEvent) => {
             process:'',
             publishDate:'',
             deadline:'',
+            course_id:'',
           };
         })
         location.reload();

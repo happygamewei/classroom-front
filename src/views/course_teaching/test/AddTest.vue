@@ -404,7 +404,7 @@
     process:'',
     publishDate:'',
     deadline:'',
-    courseId:'',
+    course_id:courseId.value,
   })
 // 模拟 ajax 异步获取内容
 onMounted(() => {
@@ -412,8 +412,9 @@ onMounted(() => {
         valueHtml.value = '<p> </p>'
     }, 1500)
     id.value =  toCourseId.getCourseId()
-    testForm.value.courseId = id.value
+    testForm.value.course_id = id.value
     courseId.value = toCourseId.getCourseId();
+    console.log(courseId.value+"555")
     getAllChapterById(courseId.value).then((res) =>{
     treeData.value = res
 })
@@ -489,7 +490,7 @@ const handleOk = (e: MouseEvent) => {
             process:'',
             publishDate:'',
             deadline:'',
-            courseId:'',
+            course_id:courseId.value,
           };
         })
         location.reload();
