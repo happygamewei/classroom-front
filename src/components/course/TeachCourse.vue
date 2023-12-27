@@ -1,66 +1,73 @@
 <template>
-  <div class="year_row" v-for="(value, key) in courseList" :key="key" >
-    <div style="height: 8vh">
-      <div class="year_term">{{ key }}</div>
-      <div class="expand" @click="expandInfo(key)"><CaretDownOutlined /> 展开</div>
+  <div>
+    <div class="year_row" v-for="(value, key) in courseList" :key="key">
+      <div style="height: 8vh">
+        <div class="year_term">{{ key }}</div>
+        <div class="expand" @click="expandInfo(key)">
+          <CaretDownOutlined /> 展开
+        </div>
+      </div>
+
+      <div style="text-align: left" v-if="key === courseKey">
+        <CourseCard v-if="value" :courses="value" style="display: inline-block; vertical-align: top;" />
+      </div>
     </div>
 
-    <div style="text-align: left" v-if="key === courseKey">
-      <CourseCard v-if="value" :courses="value" style="display: inline-block; vertical-align: top;" />
+    <div v-if="isEmptyCourseList">
+      <img src="../../assets/image/img_empty.png" />
+      <div>暂无课程</div>
     </div>
   </div>
-  <div v-if="courseList.length === 0">
-    <img src="../../assets/image/img_empty.png" />
-    <div>暂无课程</div>
-  </div>
 </template>
+
 <script setup>
-import {onMounted, ref, watch} from "vue";
-import {getUserTCourse} from "@/api/course.js";
-import {CaretDownOutlined} from '@ant-design/icons-vue';
-import {getUserId} from "@/utils/user-utils.js";
+import { onMounted, ref, watch, defineProps } from "vue";
+import { getUserTCourse } from "@/api/course.js";
+import { CaretDownOutlined } from "@ant-design/icons-vue";
+import { getUserId } from "@/utils/user-utils.js";
 import CourseCard from "@/components/course/CourseCard.vue";
+import { computed } from 'vue';
 
 const props = defineProps({
   activeType: {
-    type: String
-  }
-})
+    type: String,
+  },
+});
 
-const userId = ref('')
+const userId = ref("");
 
 onMounted(() => {
-  // const user = userInfoT.getUserInfo()
-  userId.value = getUserId()
-  getUserTeachCourse(userId.value)
-})
+  userId.value = getUserId();
+  getUserTeachCourse(userId.value);
+});
 
 // 监听 activeType 变化
 watch(() => props.activeType, (newValue, oldValue) => {
   getUserTCourse(userId.value, newValue).then((res) => {
-    courseList.value = res
-  })
+    courseList.value = res;
+  });
 });
 
 // 得到课程信息
-const courseList = ref([])
+const courseList = ref([]);
 const getUserTeachCourse = (userId) => {
   getUserTCourse(userId, props.activeType).then((res) => {
-    courseList.value = res
-  })
-}
+    courseList.value = res;
+  });
+};
 
 // 展开课程信息
-const courseKey = ref(null)
+const courseKey = ref(null);
 const expandInfo = (value) => {
-  if(courseKey.value === null){
-    courseKey.value = value
-  }else {
-    courseKey.value = null
-  }
-}
+  courseKey.value = courseKey.value === value ? null : value;
+};
 
+// 计算是否课程列表为空
+const isEmptyCourseList = computed(() => {
+  return Object.keys(courseList.value).length === 0;
+});
 </script>
+
 <style>
 .year_term{
   float: left;

@@ -26,6 +26,9 @@
           <div v-else-if="item.typeContent === TEST_CONTENT">
             <TestContent :contentInfo="item.contentInfo" />
           </div>
+          <div v-else-if="item.typeContent === TOPIC_CONTENT">
+            <TopicContent :contentInfo="item.contentInfo" />
+          </div>
 
           <div v-else class="tree_class">
             <div class="expand_tree" @click="toggleSubContent(item)">
@@ -122,15 +125,15 @@
             <img src="@/assets/image/icon-homework.svg" alt="作业" style="height: 5vh" />
             <div style="margin-left: 0.3vw">作业</div>
           </div>
-          <div class="content_class">
+          <div class="content_class" @click="AddTest">
             <img src="@/assets/image/icon-testing.svg" alt="测试" style="height: 5vh" />
-            <div style="margin-left: 0.3vw" @click="AddTest">测试</div>
+            <div style="margin-left: 0.3vw">测试</div>
           </div>
           <div class="content_class">
             <img src="@/assets/image/icon-notice.svg" alt="公告" style="height: 5vh" />
             <div style="margin-left: 0.3vw">公告</div>
           </div>
-          <div class="content_class">
+          <div class="content_class" @click="AddTopic">
             <img src="@/assets/image/icon-topicDiscussion.svg" alt="话题" style="height: 5vh" />
             <div style="margin-left: 0.3vw">话题</div>
           </div>
@@ -148,9 +151,12 @@ import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import {ElMessage} from "element-plus";
 import HomeContent from "@/components/chapter/HomeContent.vue";
 import TestContent from "@/components/chapter/TestContent.vue";
-import {ADMIN, COMMON, HOMEWORK_CONTENT, TEST_CONTENT} from "@/config/setting.js";
+import TopicContent from "@/components/chapter/TopicContent.vue";
+import {ADMIN, COMMON, HOMEWORK_CONTENT, TEST_CONTENT, TOPIC_CONTENT} from "@/config/setting.js";
 import {getRoles} from "@/utils/user-utils.js";
 import {useRouter} from "vue-router";
+import { Modal } from "ant-design-vue";
+import mitter from "../../../main.js";
 
 const toCourseId = userCourseId()
 
@@ -195,7 +201,7 @@ const getChapterByCourseInfo = (courseId) => {
   getChapterByCourse(courseId).then((res) => {
     chapterList.value = res
     treeData.value = res
-    // console.log(chapterList.value)
+    console.log(chapterList.value)
   })
 }
 
@@ -315,11 +321,17 @@ const wrapperCol = {
 const router = useRouter();
 // 添加测试
 const AddTest = () => {
-  console.log(123)
   router.push({
     name:'AddTest',
   })
 }
+
+// 添加话题
+const showMode = ref(true);
+const AddTopic = () => {
+  mitter.emit("showMode", showMode.value);
+  dialogVisible.value = false
+};
 
 
 </script>

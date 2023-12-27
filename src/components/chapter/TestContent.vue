@@ -2,7 +2,7 @@
   <div>
     <a-card :bordered="true" class="content_card">
       <a-list item-layout="horizontal">
-        <template v-for="item in homeworkList" :key="item?.homeworkId">
+        <template v-for="item in homeworkList" :key="item?.testId">
           <a-list-item>
             <a-list-item-meta
                 description="作业列表我来瞅瞅，是伟大的神祇写的欸" >
@@ -11,7 +11,7 @@
               </template>
               <template #avatar>
                 <a-avatar size="middle" src="src/assets/image/icon-testing.svg"></a-avatar>
-                <p style="margin-left: 0.3vw;font-size: 0.5rem;">测试</p>
+                <p style="margin-left: 0.1vw;font-size: 0.8rem;">测试</p>
               </template>
             </a-list-item-meta>
           </a-list-item>

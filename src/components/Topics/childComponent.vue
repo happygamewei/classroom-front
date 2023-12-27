@@ -18,7 +18,7 @@
         :visible="visible[index]"
         placement="top"
         :width="160"
-        v-if="userId == childComment.typeId"
+        v-if="userId == childComment.typeId || userRole == 'admin'"
       >
         <p>确定要删除这条评论吗？</p>
         <div style="text-align: right; margin: 0">
@@ -126,6 +126,7 @@ export default {
     const reload = inject("reload");
     const user = ref([]);
     const isFolded = ref(true);
+    const userRole = ref("");
     onMounted(() => {
       courseId.value = toCourseId.getCourseId();
       console.log("课程id:" + courseId.value);
@@ -134,7 +135,8 @@ export default {
     });
     const getInfo = () => {
       getUserInfo().then((res) => {
-        userId.value = res.userId;
+        userId.value = res.user.userId;
+        userRole.value = res.roles;
       });
     };
     //添加有父评论的评论
@@ -193,6 +195,7 @@ export default {
       user,
       toggleFold,
       isFolded,
+      userRole,
     };
   },
   data() {

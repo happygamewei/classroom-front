@@ -2,7 +2,7 @@
   <div>
     <a-card :bordered="true" class="content_card">
       <a-list item-layout="horizontal">
-        <template v-for="item in homeworkList" :key="item?.homeworkId">
+        <template v-for="item in homeworkList" :key="item?.topicId">
           <a-list-item>
             <a-list-item-meta
                 :description="item ? item.content : ''" >
@@ -11,7 +11,7 @@
               </template>
               <template #avatar>
                 <a-avatar size="middle" src="src/assets/image/icon-homework.svg"></a-avatar>
-                <p style="margin-left: 0.1vw;font-size: 0.8rem;">作业</p>
+                <p style="margin-left: 0.1vw;font-size: 0.8rem;">话题</p>
               </template>
             </a-list-item-meta>
           </a-list-item>

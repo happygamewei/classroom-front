@@ -8,7 +8,12 @@
           >回复</span
         >&nbsp;&nbsp;</span
       >
-      <el-popover :visible="visible" placement="top" :width="160">
+      <el-popover
+        :visible="visible"
+        placement="top"
+        :width="160"
+        v-if="userId == item.typeId || userRole == 'admin'"
+      >
         <p>确定要删除这条评论吗？</p>
         <div style="text-align: right; margin: 0">
           <el-button size="small" text @click="visible = false">取消</el-button>
@@ -100,6 +105,7 @@ export default {
     const courseId = ref();
     const reload = inject("reload");
     const isFolded = ref(true);
+    const userRole = ref("");
     onMounted(() => {
       courseId.value = toCourseId.getCourseId();
       getInfo();
@@ -107,7 +113,8 @@ export default {
     });
     const getInfo = () => {
       getUserInfo().then((res) => {
-        userId.value = res.userId;
+        userId.value = res.user.userId;
+        userRole.value = res.roles;
       });
     };
     //添加有父评论的评论
@@ -167,6 +174,8 @@ export default {
       user,
       isFolded,
       toggleFold,
+      userId,
+      userRole,
     };
   },
 };

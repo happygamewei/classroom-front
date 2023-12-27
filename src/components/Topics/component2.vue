@@ -15,10 +15,18 @@
                 </span>
 
                 <br />
-                <div class="content2" v-if="item.publishDate == null">
+                <div
+                  class="content2"
+                  v-if="
+                    item.publishDate == null && item.topic_user_role == 'admin'
+                  "
+                >
                   <span>未发布</span>
                 </div>
-                <div v-else class="content1">
+                <div
+                  v-if="item.publishDate != null && userRole == 'admin'"
+                  class="content1"
+                >
                   截止时间：
                   <span v-if="item.deadline != null">
                     {{ formatDeadline(item.deadline) }}
@@ -34,10 +42,13 @@
                     {{ item.commentCount }}
                   </span>
                 </div>
-                <div class="issue" v-if="item.publishDate == null">
+                <div
+                  class="issue"
+                  v-if="item.publishDate == null && userRole == 'admin'"
+                >
                   <send-outlined @click="issue(item.topicId)" />发布
                 </div>
-                <div class="more">
+                <div class="more" v-if="userRole == 'admin'">
                   <p style="font-size: 2vh">更多</p>
                   <el-popover
                     placement="right"
@@ -74,7 +85,7 @@
   </a-card>
 </template>
 <script lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import {
   getList,
   getUserInfo,
@@ -87,8 +98,6 @@ import { userCourseId } from "../../store/index.js";
 import { useRouter } from "vue-router";
 import { EllipsisOutlined, SendOutlined } from "@ant-design/icons-vue";
 import mitter from "../../main.js";
-import { nextTick } from "vue";
-
 export default {
   components: {
     EllipsisOutlined,
@@ -105,7 +114,8 @@ export default {
     const key = ref(0);
     const count = ref(0);
     const option = ref();
-
+    const userRole = ref("");
+    const reload = inject("reload");
     mitter.on("checked", (data) => {
       isPost.value = data;
     });
@@ -139,14 +149,12 @@ export default {
      * 获取参加这个课程的所有话题
      */
     const getAllTopics = (courseId, option) => {
-      console.log("排序选择：" + option);
       getList(courseId.value).then((res) => {
         switch (option) {
           case 1:
             res.sort(
               (a, b) => new Date(a.publishDate) - new Date(b.publishDate)
             );
-            console.log("1111");
 
             break;
 
@@ -154,17 +162,14 @@ export default {
             res.sort(
               (a, b) => new Date(b.publishDate) - new Date(a.publishDate)
             );
-            console.log("2222");
 
             break;
           case 3:
             res.sort((a, b) => a.title.localeCompare(b.title));
-            console.log("3333");
 
             break;
           case 4:
             res.sort((a, b) => b.title.localeCompare(a.title));
-            console.log("4444");
 
             break;
           default:
@@ -172,11 +177,11 @@ export default {
         }
         objects.value = res;
       });
-      console.log(objects.value);
     };
     const getUserInfo1 = () => {
       getUserInfo().then((res) => {
-        userId.value = res.userId;
+        userId.value = res.user.userId;
+        userRole.value = res.roles;
       });
     };
     const deleteTopic = (topicId) => {
@@ -201,7 +206,7 @@ export default {
           noJoinNumber: noJoinNumber,
         },
         query: {
-          isPost: isPost.value.toString(), // 将布尔值转换为字符串类型
+          isPost: isPost.value?.toString(), // 将布尔值转换为字符串类型
         },
       });
     };
@@ -227,6 +232,7 @@ export default {
       key,
       count,
       formatDeadline,
+      userRole,
     };
   },
 };
@@ -258,8 +264,8 @@ export default {
 }
 .totalCount {
   position: relative;
-  left: -70vh;
-  top: -8vh;
+  left: -140vh;
+  top: -1vh;
 }
 .topic-list {
   padding-bottom: 2vh;

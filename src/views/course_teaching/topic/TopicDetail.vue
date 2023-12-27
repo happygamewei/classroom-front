@@ -29,7 +29,7 @@
             noJoinNumber
           }}</span
         >
-        <span class="like" v-if="refreshPage">
+        <span class="like">
           <like-outlined :style="{ color: 'blue' }" @click="clickCount" />{{
             object ? object.likeCount : ""
           }}</span
@@ -93,6 +93,7 @@ export default {
     LikeOutlined,
     DeleteOutlined,
     Comment,
+    getUserInfo,
   },
   setup() {
     const toCourseId = userCourseId();
@@ -113,6 +114,7 @@ export default {
     const like = ref();
     const key = ref(0);
     const courseId = ref();
+    const userRole = ref("");
     const reload = inject("reload");
     onMounted(() => {
       courseId.value = toCourseId.getCourseId();
@@ -144,7 +146,8 @@ export default {
     };
     const getInfo = () => {
       getUserInfo().then((res) => {
-        userId.value = res.userId;
+        userId.value = res.user.userId;
+        userRole.value = res.roles;
       });
     };
     const postComments = () => {
@@ -195,6 +198,7 @@ export default {
       key,
       simpleImage: Empty.PRESENTED_IMAGE_SIMPLE,
       isPost,
+      userRole,
     };
   },
 };
@@ -227,7 +231,7 @@ export default {
 }
 .detailtitle {
   margin-top: 2vh;
-  margin-left: -130vh;
+  margin-left: -120vh;
   font-size: 2.5vh;
   font-weight: bolder;
 }

@@ -104,3 +104,11 @@ export async function cancelCourse(courseId, isTop) {
     }
     return Promise.reject(new Error(res?.msg))
 }
+
+export async function exitCourse(courseId) {
+    const res = await request.get('/classroom/course/exit/'+courseId)
+    if(res?.code === 200){
+        return res?.msg
+    }
+    return Promise.reject(new Error(res?.msg))
+}
