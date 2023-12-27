@@ -7,7 +7,7 @@
       <div class="Resource_top-right">
 <!--        <el-button type="success" size="large" @click="selectTest()">选择文件或者链接</el-button>-->
         <el-button type="success" @click="CreateResource()">创建资料</el-button>
-<!--        <el-button type="success"  size="large" @click="selectFileOrLink()" round style="width: 17vh; height: 5vh;"><PlusOutlined />&nbsp; 添加资料</el-button>-->
+        <el-button type="success"  size="large" @click="selectFileOrLink()" round style="width: 17vh; height: 5vh;"><PlusOutlined />&nbsp; 添加资料</el-button>
 <!--        <el-button @click="addtest" style="width: 17vh; height: 5vh;" class="a" type="success" round><PlusOutlined />添加测试</el-button>-->
       </div>
     </div>
@@ -261,7 +261,7 @@
         </a-list>
       </a-card>
     </div>
-<!--    <AddOrEditResource v-if="openSelect1" :openCreate="openSelect1" @updateOpenAdd="updateOpen"/>-->
+    <AddOrEditResource v-if="openSelect1" :openCreate="openSelect1" @updateOpenAdd="updateOpen"/>
   </div>
 
 </template>
