@@ -8,22 +8,27 @@
 <!--        <a-breadcrumb-item>An Application</a-breadcrumb-item>-->
 <!--      </a-breadcrumb>-->
 
-      <img src="../assets/image/logo_blue.png" class="header_img">
+      <div>
+        <img src="../assets/image/logo_blue.png" class="header_img">
+      </div>
 
-      <a-breadcrumb separator=">" v-for="(item, index) in state.list" :key="index">
-        <a-breadcrumb-item v-if="index < state.list.length-1">
-            {{item.meta.title}}
-        </a-breadcrumb-item>
-        <a-breadcrumb-item @click="toThisPage(item)" v-else>
-          {{item.meta.title}}
-        </a-breadcrumb-item>
-      </a-breadcrumb>
+<!--      <a-breadcrumb style="margin-left: 1vw; margin-top: 1vh" separator=">" v-for="(item, index) in state.list" :key="index">-->
+<!--        <a-breadcrumb-item v-if="index < state.list.length-1">-->
+<!--            {{item.meta.title}}-->
+<!--        </a-breadcrumb-item>-->
+<!--        <a-breadcrumb-item @click="toThisPage(item)" v-else>-->
+<!--          {{item.meta.title}}-->
+<!--        </a-breadcrumb-item>-->
+<!--      </a-breadcrumb>-->
+      <div class="ClassHeader">
+        <h3>我的课堂</h3>
+      </div>
     </div>
 
 <!--    <div class="login_btn" @click="toLogin">-->
     <div class="login_btn">
       <a-dropdown :trigger="['click']">
-        <a>登录</a>
+        <a style="font-size: 1rem; cursor: pointer;">登录</a>
         <template #overlay>
           <a-menu style="width: 8vw; margin-left: 3vw">
             <a-menu-item key="0">
@@ -115,5 +120,11 @@ const handleLogout = () => {
   width: 8vw;
   margin-top: 2.5vh;
   margin-left: 2vw;
+}
+.ClassHeader{
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  font-size: 1.5rem;
 }
 </style>

@@ -57,7 +57,7 @@
               <template #overlay v-if="isStudent">
                 <a-menu style="width: 4.5vw; margin-left: -2vw">
                   <a-menu-item key="0">
-                    <a>退课</a>
+                    <a @click="showExit(item.courseId)">退课</a>
                   </a-menu-item>
                 </a-menu>
               </template>
@@ -80,6 +80,11 @@
       <div>{{content}}</div>
     </a-modal>
 
+<!--    退课-->
+    <a-modal v-model:open="openExit" :title="titleInfo" @ok="handleOkExit" cancelText="取消" okText="退课">
+      <div>{{content}}</div>
+    </a-modal>
+
     <a-modal v-model:open="showCode" :footer="null">
       <qrcode-vue :value="code" size:300  ></qrcode-vue>
     </a-modal>
@@ -89,7 +94,7 @@
 import { ref } from 'vue';
 import {QrcodeOutlined, DownOutlined, EllipsisOutlined} from "@ant-design/icons-vue";
 import {useRouter} from "vue-router";
-import {cancelCourse, deleteCourse, openTheCourse, overTheCourse, renewCode} from "@/api/course.js";
+import {cancelCourse, deleteCourse, openTheCourse, overTheCourse, renewCode, exitCourse} from "@/api/course.js";
 import {ElMessage} from "element-plus";
 import QrcodeVue from 'qrcode.vue'
 
@@ -189,6 +194,21 @@ const openCourse = (courseId) => {
   })
 }
 
+// 退课
+const openExit = ref(false)
+const showExit = (courseId) => {
+  titleInfo.value = "确定要退出吗？"
+  content.value = "退出后，关于该课程的所有内容都会被删除！"
+  courseIds.value = courseId
+  openExit.value = true
+}
+const handleOkExit = () => {
+  exitCourse(courseIds.value).then(res => {
+    ElMessage.success(res)
+    openExit.value = false
+    location.reload();
+  })
+}
 
 // 转二维码
 const showCode = ref(false)
@@ -208,7 +228,6 @@ const renewCourseCode = (courseId) => {
 
 // 取消置顶
 const handleCancelTop = (courseId, isTop) => {
-  console.log(213)
   cancelCourse(courseId, isTop).then(res => {
     console.log(res)
   })

@@ -9,13 +9,13 @@
       <CourseCard v-if="value" :courses="value" style="display: inline-block; vertical-align: top;" />
     </div>
   </div>
-  <div v-if="courseList.length === 0">
+  <div v-if="isEmptyCourseList">
     <img src="../../assets/image/img_empty.png" />
-    <div>暂无课程</div>
+    <div style="margin-bottom: 5vh">暂无课程</div>
   </div>
 </template>
 <script setup>
-import {onMounted, ref, watch} from "vue";
+import {onMounted, ref, watchEffect} from "vue";
 import {getUserTCourse} from "@/api/course.js";
 import {CaretDownOutlined} from '@ant-design/icons-vue';
 import {getUserId} from "@/utils/user-utils.js";
@@ -35,18 +35,28 @@ onMounted(() => {
   getUserTeachCourse(userId.value)
 })
 
-// 监听 activeType 变化
-watch(() => props.activeType, (newValue, oldValue) => {
-  getUserTCourse(userId.value, newValue).then((res) => {
-    courseList.value = res
-  })
+const courseList = ref({});
+const isEmptyCourseList = ref(false);
+
+watchEffect(() => {
+  if (Object.keys(courseList.value).length === 0) {
+    isEmptyCourseList.value = true;
+  } else {
+    isEmptyCourseList.value = false;
+  }
+});
+
+watchEffect(() => {
+  getUserTCourse(userId.value, props.activeType).then((res) => {
+    courseList.value = res;
+  });
 });
 
 // 得到课程信息
-const courseList = ref([])
 const getUserTeachCourse = (userId) => {
   getUserTCourse(userId, props.activeType).then((res) => {
     courseList.value = res
+
   })
 }
 
