@@ -134,7 +134,7 @@ export default {
     });
     const getInfo = () => {
       getUserInfo().then((res) => {
-        userId.value = res.userId;
+        userId.value = res.user.userId;
       });
     };
     //添加有父评论的评论

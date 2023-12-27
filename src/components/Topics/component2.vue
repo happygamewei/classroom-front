@@ -18,7 +18,10 @@
                 <div class="content2" v-if="item.publishDate == null">
                   <span>未发布</span>
                 </div>
-                <div v-else class="content1">
+                <div
+                  v-if="item.publishDate != null && userRole == 'admin'"
+                  class="content1"
+                >
                   截止时间：
                   <span v-if="item.deadline != null">
                     {{ formatDeadline(item.deadline) }}
@@ -34,10 +37,13 @@
                     {{ item.commentCount }}
                   </span>
                 </div>
-                <div class="issue" v-if="item.publishDate == null">
+                <div
+                  class="issue"
+                  v-if="item.publishDate == null && userRole == 'admin'"
+                >
                   <send-outlined @click="issue(item.topicId)" />发布
                 </div>
-                <div class="more">
+                <div class="more" v-if="userRole == 'admin'">
                   <p style="font-size: 2vh">更多</p>
                   <el-popover
                     placement="right"
@@ -87,8 +93,6 @@ import { userCourseId } from "../../store/index.js";
 import { useRouter } from "vue-router";
 import { EllipsisOutlined, SendOutlined } from "@ant-design/icons-vue";
 import mitter from "../../main.js";
-import { nextTick } from "vue";
-
 export default {
   components: {
     EllipsisOutlined,
@@ -105,7 +109,7 @@ export default {
     const key = ref(0);
     const count = ref(0);
     const option = ref();
-
+    const userRole = ref("");
     mitter.on("checked", (data) => {
       isPost.value = data;
     });
@@ -176,7 +180,9 @@ export default {
     };
     const getUserInfo1 = () => {
       getUserInfo().then((res) => {
-        userId.value = res.userId;
+        userId.value = res.user.userId;
+        userRole.value = res.roles;
+        console.log("userid:" + userId.value + "roles:" + userRole.value);
       });
     };
     const deleteTopic = (topicId) => {
@@ -227,6 +233,7 @@ export default {
       key,
       count,
       formatDeadline,
+      userRole,
     };
   },
 };
@@ -258,8 +265,8 @@ export default {
 }
 .totalCount {
   position: relative;
-  left: -70vh;
-  top: -8vh;
+  left: -140vh;
+  top: -1vh;
 }
 .topic-list {
   padding-bottom: 2vh;
