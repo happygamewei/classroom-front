@@ -27,3 +27,9 @@ export const NOTICE_CONTENT = "4";
 
 // 章节-话题内容
 export const TOPIC_CONTENT = "5";
+
+// 不需要登录的路由
+export const WHITE_LIST = ['/login', '/login/passwordLogin', '/login/faceLogin', '/logon']
+
+// 外层布局的路由地址
+export const LAYOUT_PATH = '/';

@@ -8,16 +8,16 @@
         </a>
         <template #overlay>
           <a-menu v-model="option">
-            <a-menu-item>
+            <a-menu-item @click="handleItem(1)">
               <a value="1" href="javascript:;">按添加时间升序</a>
             </a-menu-item>
-            <a-menu-item>
+            <a-menu-item @click="handleItem(2)">
               <a value="2" href="javascript:;">按添加时间降序</a>
             </a-menu-item>
-            <a-menu-item>
-              <a value="3" href="javascript:;">按名称生序</a>
+            <a-menu-item @click="handleItem(3)">
+              <a value="3" href="javascript:;">按名称升序</a>
             </a-menu-item>
-            <a-menu-item>
+            <a-menu-item @click="handleItem(4)">
               <a value="4" href="javascript:;">按名称降序</a>
             </a-menu-item>
           </a-menu>
@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import { Menu, Button, Modal, Switch } from "ant-design-vue";
+import { Button, Modal, Switch } from "ant-design-vue";
 import { onMounted, ref } from "vue";
 import { userCourseId } from "/src/store/index.js";
 import { OrderedListOutlined, PieChartOutlined } from "@ant-design/icons-vue";
@@ -69,7 +69,6 @@ export default {
     const checked = ref(true);
     const showMode = ref(true);
     const option = ref();
-    const postOption = inject("option");
     onMounted(() => {
       courseId.value = toCourseId.getCourseId();
       getTopicCount(courseId);
@@ -86,7 +85,6 @@ export default {
         });
     };
     const handleClick = () => {
-      console.log("checked:" + checked.value);
       mitter.emit("checked", checked.value);
     };
     const handleSwitchChange = (value) => {
@@ -95,7 +93,10 @@ export default {
     };
     const handleAdd = () => {
       mitter.emit("showMode", showMode.value);
-      console.log("添加开关！！！！" + showMode.value);
+    };
+    const handleItem = (optionselect) => {
+      console.log("option：" + optionselect);
+      mitter.emit("option-selected", optionselect);
     };
     return {
       courseId,
@@ -107,6 +108,8 @@ export default {
       checked,
       handleSwitchChange,
       handleAdd,
+      option,
+      handleItem,
     };
   },
 };

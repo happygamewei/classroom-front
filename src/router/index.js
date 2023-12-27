@@ -8,6 +8,8 @@ import TestContent from "../views/course_teaching/test/TestContent.vue"
 import NoticeDetail from "../views/course_teaching/notice/NoticeDetail.vue";
 import NoticeDialog from "../views/course_teaching/notice/NoticeDialog.vue";
 import Login from "../views/login.vue"
+import {getToken} from "@/utils/token-utils.js";
+import {WHITE_LIST,LAYOUT_PATH } from "@/config/setting.js";
 const routes = [
 
     {
@@ -74,6 +76,22 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes
+})
+
+/**
+ * 路由守护
+ */
+router.beforeEach(async (to, from) => {
+    if(!getToken()){
+        //未登录跳转登录界面
+        if(!WHITE_LIST.includes(to.path)){
+            return{
+                path: '/login',
+                query: to.path === LAYOUT_PATH ? {} : {from: to.path}
+            };
+        }
+        return;
+    }
 })
 
 export default router;

@@ -92,3 +92,15 @@ export async function openTheCourse(courseId){
     }
     return Promise.reject(new Error(res?.msg))
 }
+
+// 取消置顶
+export async function cancelCourse(courseId, isTop) {
+    const res = await request.put('/classroom/course/top', {
+        courseId: courseId,
+        isTop: isTop
+    })
+    if(res?.code === 200){
+        return res?.msg
+    }
+    return Promise.reject(new Error(res?.msg))
+}
