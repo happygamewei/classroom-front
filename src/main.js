@@ -14,5 +14,6 @@ import mitt from 'mitt'
 const mitter = mitt();
 export default mitter
 
+
 createApp(App).use(Antd).use(ElementPlus).use(createPinia()).use(router).mount('#app')
 

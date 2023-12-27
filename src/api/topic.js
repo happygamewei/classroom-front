@@ -37,7 +37,7 @@ export async function getUserInfo(){
   const res=await request.get('/getInfo')
 
   if(res.code==200){
-    return res.user;
+    return res;
   }
   return Promise.reject(new Error (res.Error));
 }

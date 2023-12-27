@@ -43,22 +43,15 @@
         </div>
       </a-form-item>
     </a-form>
-    <!-- <a-input
-      v-model:value="topic.title"
-      label="话题标题"
-      style="width: 90%"
-      placeholder="请输入话题标题"
-      :rules="[{ required: true, message: '请输入测试标题!' }]"
-    /> -->
-
-    <span class="label">活动类型标签</span>
+    <span v-if="userRole == 'admin'" class="label">活动类型标签</span>
     <a-input
       class="typeContent"
       v-model:value="topic.typeLabel"
       placeholder="话题"
       style="width: 30%"
+      v-if="userRole == 'admin'"
     />
-    <span class="share">
+    <span v-if="userRole == 'admin'" class="share">
       <span> 知识共享协议&nbsp;&nbsp;</span>
       <el-select
         style="width: 30vh"
@@ -76,8 +69,13 @@
     </span>
 
     <br />
-    <span class="apply">应用环节</span>
-    <el-select v-model="topic.process" placeholder="Select" style="width: 30vh">
+    <span v-if="userRole == 'admin'" class="apply">应用环节</span>
+    <el-select
+      v-if="userRole == 'admin'"
+      v-model="topic.process"
+      placeholder="Select"
+      style="width: 30vh"
+    >
       <el-option
         v-for="item1 in options2"
         :key="item1.dictCode"
@@ -98,7 +96,7 @@
       @node-click="handleNodeClick"
     />
     <br />
-    <span class="btn1">
+    <span v-if="userRole == 'admin'" class="btn1">
       <a-switch v-if="topic.publishDate == null" v-model:checked="checked1" />
       <a-switch
         v-else-if="topic.publishDate != null"
@@ -108,7 +106,7 @@
     </span>
 
     <div class="hidden" v-if="checked1 == true || topic.publishDate != null">
-      <a-space direction="vertical" :size="12">
+      <a-space v-if="userRole == 'admin'" direction="vertical" :size="12">
         <span class="publishDate2">发布时间</span>
         <a-date-picker
           class="publishDate1"
@@ -133,7 +131,7 @@
         </span>
       </a-space>
       <br />
-      <div class="bottom">
+      <div v-if="userRole == 'admin'" class="bottom">
         <span> 总分&nbsp;&nbsp;</span>
         <a-input-number
           :style="(width = '50%')"
@@ -158,7 +156,7 @@
 
 <script>
 import { Modal, Button } from "ant-design-vue";
-import { onMounted, ref, shallowRef, onBeforeUnmount } from "vue";
+import { onMounted, ref, shallowRef } from "vue";
 
 import { Editor, Toolbar } from "@wangeditor/editor-for-vue";
 import "@wangeditor/editor/dist/css/style.css"; // 引入 css
@@ -197,6 +195,7 @@ export default {
     const content = "";
     const mode = "default";
     const formRef = ref(null);
+    const userRole = ref("");
     const topic = ref({
       topicId: null,
       title: "",
@@ -257,11 +256,13 @@ export default {
     };
     const getUserInfo1 = () => {
       getUserInfo().then((res) => {
-        userId.value = res.userId;
+        userId.value = res.user.userId;
+        userRole.value = res.roles;
       });
     };
 
     const handleClose = () => {
+      console.log("触发了！！！");
       showMode.value = false;
       topic.value.title = "";
       topic.value.content = "";
@@ -270,8 +271,8 @@ export default {
       topic.value.process = null;
       topic.value.publishDate = null;
       topic.value.deadline = null;
-      topic.value.total = 0;
-      topic.value.reply = 0;
+      topic.value.totalScore = 0;
+      topic.value.leastReplyNumber = 0;
       topic.value.chapterId = null;
       topic.value.chapterName = "";
       checked1.value = false;
@@ -283,6 +284,9 @@ export default {
     };
 
     const handleOk = () => {
+      console.log("topic.value.content" + topic.value.content);
+      topic.value.content = removeHtmlTags(topic.value.content);
+      console.log("topic.value.content" + topic.value.content);
       if (topic.value.title == "" || topic.value.title == null) {
         alert("标题不能为空");
         return;
@@ -342,6 +346,10 @@ export default {
     const handleCreated = (editor) => {
       editorRef.value = editor; // 记录 editor 实例，重要！
     };
+    const removeHtmlTags = (htmlString) => {
+      const doc = new DOMParser().parseFromString(htmlString, "text/html");
+      return doc.body.textContent || "";
+    };
     return {
       topic,
       handleClose,
@@ -366,6 +374,7 @@ export default {
       formRef,
       checked3,
       moment,
+      userRole,
     };
   },
 };

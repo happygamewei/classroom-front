@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="userRole == 'admin'">
     <span>
       <ordered-list-outlined style="color: blue" />
       <a-dropdown>
@@ -36,10 +36,8 @@
     <span class="topLeft">
       <a><pie-chart-outlined /> 统计</a>
     </span>
-    <a-button class="btn3" type="primary" @click="handleAdd"
-      >+添加话题</a-button
-    >
   </div>
+  <a-button class="btn3" type="primary" @click="handleAdd">+添加话题</a-button>
 </template>
 
 <script>
@@ -47,7 +45,7 @@ import { Button, Modal, Switch } from "ant-design-vue";
 import { onMounted, ref } from "vue";
 import { userCourseId } from "/src/store/index.js";
 import { OrderedListOutlined, PieChartOutlined } from "@ant-design/icons-vue";
-import { topicCount } from "../../api/topic.js";
+import { topicCount, getUserInfo } from "../../api/topic.js";
 import { inject } from "vue";
 import mitter from "../../main.js";
 export default {
@@ -69,10 +67,12 @@ export default {
     const checked = ref(true);
     const showMode = ref(true);
     const option = ref();
+    const userRole = ref("");
     onMounted(() => {
       courseId.value = toCourseId.getCourseId();
       getTopicCount(courseId);
       handleClick();
+      getInfo();
     });
 
     const getTopicCount = (courseId) => {
@@ -83,6 +83,11 @@ export default {
         .catch((error) => {
           console.log(error);
         });
+    };
+    const getInfo = () => {
+      getUserInfo().then((res) => {
+        userRole.value = res.roles;
+      });
     };
     const handleClick = () => {
       mitter.emit("checked", checked.value);
@@ -110,6 +115,7 @@ export default {
       handleAdd,
       option,
       handleItem,
+      userRole,
     };
   },
 };

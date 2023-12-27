@@ -12,12 +12,17 @@
     "@vueup/vue-quill": "^1.0.0-alpha.40",
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-vue": "^5.1.12",
+    "@ant-design/icons-vue": "^6.1.0",
+    "@tinymce/tinymce-vue": "^5.1.1",
+    "@wangeditor/editor": "^5.1.23",
+    "@wangeditor/editor-for-vue": "next",
     "ant-design-vue": "^4.0.2",
     "axios": "^1.5.0",
     "dayjs": "^1.11.10",
     "element-plus": "^2.3.12",
     "moment": "^2.29.4",
     "element-ui": "^2.15.14",
+    "element-plus": "^2.3.12",
     "js-cookie": "^3.0.5",
     "mitt": "^3.0.1",
     "pinia": "^2.1.6",
@@ -29,6 +34,14 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
-    "vite": "^4.4.5"
-  }
+    "less": "^4.2.0",
+    "sass": "^1.67.0",
+    "unplugin-auto-import": "^0.16.6",
+    "unplugin-vue-components": "^0.25.2",
+    "vite": "^4.4.11"
+  },
+  "description": "使用 vite+vue3+js+axios+router+pinia+antd 技术实现",
+  "main": "vite.config.js",
+  "author": "",
+  "license": "ISC"
 }
