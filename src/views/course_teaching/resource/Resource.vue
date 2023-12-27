@@ -7,7 +7,7 @@
       <div class="Resource_top-right">
 <!--        <el-button type="success" size="large" @click="selectTest()">选择文件或者链接</el-button>-->
         <el-button type="success" @click="CreateResource()">创建资料</el-button>
-        <el-button type="success"  size="large" @click="selectFileOrLink()" round style="width: 17vh; height: 5vh;"><PlusOutlined />&nbsp; 添加资料</el-button>
+<!--        <el-button type="success"  size="large" @click="selectFileOrLink()" round style="width: 17vh; height: 5vh;"><PlusOutlined />&nbsp; 添加资料</el-button>-->
 <!--        <el-button @click="addtest" style="width: 17vh; height: 5vh;" class="a" type="success" round><PlusOutlined />添加测试</el-button>-->
       </div>
     </div>
@@ -283,7 +283,7 @@ import {getChapterByCourse} from "../../../api/chapter.js";
 import {addResourceInfo,getResourceList,deleteResourceById} from "../../../api/resource.js";
 import {getInfo} from "../../../api/login.js"
 import {ElMessage} from "element-plus";
-import {Modal, notification, NotificationPlacement, CascaderProps} from "ant-design-vue";
+import {Modal, notification, NotificationPlacement} from "ant-design-vue";
 import AddOrEditResource from "@/components/resource/AddOrEditResource.vue";
 
 const toCourseId = userCourseId()
@@ -305,7 +305,10 @@ onMounted(()=>{
     classTypeList.value = res;
   })
   getInfo().then(res =>{
+    console.log(res)
     createBy.value = res.user.createBy
+    console.log(createBy.value);
+    // console.log(res.user.userId)
   })
   getResourceByCourseInfo(id.value)
   // console.log("当前时间"+formattedTime)
