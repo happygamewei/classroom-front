@@ -5,8 +5,10 @@
           共{{num}}个活动
       </div>
       <div class="Resource_top-right">
-<!--        <el-button type="success" size="large">+ 新建文件夹</el-button>-->
-        <el-button type="success" plain size="large" @click="addResource()"><PlusOutlined />&nbsp; 添加资料</el-button>
+<!--        <el-button type="success" size="large" @click="selectTest()">选择文件或者链接</el-button>-->
+        <el-button type="success" @click="CreateResource()">创建资料</el-button>
+        <el-button type="success"  size="large" @click="selectFileOrLink()" round style="width: 17vh; height: 5vh;"><PlusOutlined />&nbsp; 添加资料</el-button>
+<!--        <el-button @click="addtest" style="width: 17vh; height: 5vh;" class="a" type="success" round><PlusOutlined />添加测试</el-button>-->
       </div>
     </div>
 
@@ -40,61 +42,51 @@
               </a-menu>
             </template>
           </a-dropdown>
-          <el-button type="primary" plain size="large"><CheckOutlined />批量操作</el-button>
+          <el-button type="primary" plain size="large" style="width: 17vh; height: 5vh;"><CheckOutlined />批量操作</el-button>
         </div>
       </div>
     </div>
   </div>
 
-
+  <!-- 选择资料文件  -->
+  <div>
+    <a-modal v-model:open="openSelect" title="选择资料文件" @ok="handleSelect" cancelText="取消" okText="确定" zIndex="1100">
+      <p>请选择要上传的文件或外链素材</p>
+      <a-space>
+        <a-upload :action="uploadUrl" :before-upload="beforeUpload" :on-success="onSuccess">
+          <a-button style="color: #1677FF"><upload-outlined></upload-outlined>本地上传文件</a-button>
+        </a-upload>
+        <a-button style="color: #1677FF" @click="showLink()"><LinkOutlined />添加外链素材</a-button>
+        <a-modal v-model:open="openLink" title="添加外链素材" zIndex="1200">
+          <a-input v-model:value="inputUrl" @input="handleInput"></a-input>
+          <p v-if="showError" style="color: red;">请输入正确的网址链接,如：https://www.cqnu.edu.cn/</p>
+          <template #footer>
+            <a-button @click="closeinputUrlModal">取消</a-button>
+            <a-button type="primary" :disabled="showError" @click="addResource">确定</a-button>
+          </template>
+        </a-modal>
+      </a-space>
+    </a-modal>
+  </div>
 
   <!--添加资料-->
   <div>
-    <a-modal v-model:open="openAdd" :title="modalTitle" @ok="handleAddResource" width="50vw" cancelText="取消" okText="确定">
+    <a-modal v-model:open="openAdd" :title="modalTitle" @ok="handleAddResource" width="50vw" cancelText="取消" okText="确定" zIndex="1000">
       <div style="margin-top: 3vh">
         <a-form :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol">
           <a-form-item label="资料标题" :rules="[{ required: true, message: '请输入资料标题' }]">
-            <a-input size="large" style="width: 30vw" placeholder="请输入资料标题" v-model:value="formState.title"  @input="handleTitleInput"/>
+            <a-input size="large" style="width: 100%" placeholder="请输入资料标题" v-model:value="formState.title"  @blur="handleTitleInput" />
             <p v-if="showTitleError" style="color: red; height: 1vw">title is required</p>
           </a-form-item>
           <a-row>
-            <!--   文件上传       -->
-            <a-col :span="7">
-              <a-form-item label="选择资料文件">
-                <div>
-                  <a-upload :show-upload-list="false" :before-upload="handleBeforeUpload" :on-change="handleFileChange" >
-                    <a-button>选择文件</a-button>
-                  </a-upload>
-
-                  <!-- 显示选中的文件名 -->
-                  <div v-if="selectedFile">{{ selectedFile.name }}</div>
-
-                  <!-- 显示文件内容 -->
-                  <div v-if="fileContent">{{ fileContent }}</div>
+              <div class="upload-container" style="border: 1px solid #ddd; width: 100%; height: 5%; margin-bottom: 2vh" v-if="formState.typeLabel=='外链'&&formState.path!='' ">
+                <div class="left" style="margin: 0.8vh; display: inline-block;"><img src="src/assets/image/icon-resource-link.jpg"></div>
+                <div class="right" style="display: inline-block; ">
+                  <h3 style="margin: 1vh">{{formState.path}}</h3>
                 </div>
-              </a-form-item>
-            </a-col>
-            <a-col :span="6">
-              <div>
-                <a-button  @click="showLink" style="color: #535bf2"><LinkOutlined/>添加外链素材</a-button>
-                <a-modal v-model:open="openLink" title="添加外链素材" >
-<!--                  请输入链接-->
-<!--                  <a-input v-model:value="formState.path" :rules="inputLinkRules"/>-->
-<!--                  <a-form>-->
-<!--                    <a-form-item label="输入框" name="inputText" :validateStatus="validationStatus" :help="validationMessage">-->
-<!--                      <a-input v-model="formState.path" @input="handleInput"></a-input>-->
-<!--                    </a-form-item>-->
-<!--                  </a-form>-->
-                  <a-input v-model:value="inputUrl" @input="handleInput"></a-input>
-                  <p v-if="showError" style="color: red;">请输入正确的网址链接,如：https://www.cqnu.edu.cn/</p>
-                  <template #footer>
-                    <a-button @click="closeinputUrlModal">取消</a-button>
-                    <a-button type="primary" :disabled="showError" @click="submitInputUrlForm">确定</a-button>
-                  </template>
-                </a-modal>
-                <div v-if="formState.path">{{ formState.path }}</div>
+                <span style="margin-left: 52%" @click="changeData">更换资料</span>
               </div>
-            </a-col>
+
           </a-row>
 
           <a-row>
@@ -126,17 +118,20 @@
             </a-col>
             <a-col :span="12">
               <a-form-item label="所属章节">
-                <a-select placeholder="请选择" v-model:value="formState.chapterId" style="width: 15vw">
-                  <a-select-option :value="item.chapterId" v-for="item in chapterList" :key="item.chapterId">
-                    {{item.name}}
-                  </a-select-option>
-                </a-select>
-                <!-- 根据选中的选项展示子集的下拉选择框 -->
-<!--                <a-select v-model="selectedSubOption" v-if="selectedOption && selectedOption.children">-->
-<!--                  <a-select-option v-for="subOption in selectedOption.children" :key="subOption.chapterId" :value="subOption.chapterId">-->
-<!--                    {{ subOption.name }}-->
+<!--                <a-select placeholder="请选择" v-model:value="formState.chapterId" style="width: 15vw" @change="handleSelectChange(formState.chapterId)">-->
+<!--                  <a-select-option :value="item.chapterId" v-for="item in chapterList" :key="item.chapterId">-->
+<!--                    {{item.name}}-->
 <!--                  </a-select-option>-->
 <!--                </a-select>-->
+                <el-tree-select
+                    v-model="formState.chapterId"
+                    :props="treeProps"
+                    :data="chapterList"
+                    check-strictly
+                    :render-after-expand="false"
+                    node-key="chapterId"
+                    @node-click="handleNodeClick"
+                />
               </a-form-item>
             </a-col>
           </a-row>
@@ -173,10 +168,10 @@
         </div>
       </div>
     </a-modal>
-    <div class="Resource_bottom" style="margin-top: 6vh; width: 159vh;">
+
+    <!--  资料显示List  -->
+    <div class="Resource_bottom" style="margin-top: 6vh; width: 100%;">
       <a-card :bordered="true" style="width: 80vw;text-align: left;">
-        <!-- <a-card v-for="homework in homeworkList" :key="homework.homeworkId">
-          {{ homework.title }} - {{ homework.description }}</a-card> -->
         <a-list item-layout="horizontal">
           <template v-for="item in resourceList" :key="item.resourceId">
             <a-list-item>
@@ -184,8 +179,8 @@
                   description=" " >
                 <template #title>
                   <div  style="height: 12vh;width: 28vh;cursor: pointer;">
-                    <a  style=" font-size: large;width: 10vh; margin: 2vh 0vh 0vh 3vh; float: left;color: black;">{{ item.title }}</a>
-                    <div style="float: left; position: absolute;" v-if="item.publishDate==null">
+                    <a  style=" font-size: large;width: 10vh; margin: 2vh 0vh 0vh 0vh; float: left;color: black; font-family: 黑体">{{ item.title }}</a>
+                    <div style="float: left; position: absolute; margin-top: 2vh" v-if="item.publishDate==null">
                       <p style="display: inline-block;">未发布</p>
                       <p style="display: inline-block" v-if="item.typeLabel=='外链' ">&nbsp|&nbsp 外链资源</p>
                       <p style="display: inline-block">&nbsp|&nbsp {{item.process}}</p>
@@ -194,12 +189,12 @@
                     <div style="float: left; position: absolute;" v-else>
                       <p style="display: inline-block;" v-if="isCurrentTimeAfterBackendTime(item.deadline)">已结束 &nbsp|&nbsp</p>
                       <p style="display: inline-block; margin: 7vh 2vh 0vh 0vh;">截至时间:
-                      <p style="display: inline-block;" v-if="item.deadline==null"> &nbsp不限 &nbsp</p>
+                      <p style="display: inline-block;" v-if="item.deadline==null"> &nbsp不限&nbsp</p>
                       <p style="display: inline-block;">{{ item.deadline }}</p>&nbsp|</p>
                       <p style="display: inline-block;">{{ item.process }}</p>
                     </div>
                   </div>
-                  <div v-if="item.publishDate == null" style="margin-left: 75vh; margin-top: -15vh; width: 75vh; height: 15vh; display: inline-block; position: absolute;">
+                  <div  style="margin-left: 75vh; margin-top: -15vh; width: 75vh; height: 15vh; display: inline-block; position: absolute;">
                     <div class="ant-dropdown-link" @click.prevent  style="float: right;margin-top: 1.25vh;cursor: pointer;">
 
                       <a-dropdown>
@@ -211,7 +206,7 @@
                         <template #overlay>
                           <a-menu>
                             <a-menu-item>
-                              <a @click="Edit">编辑</a>
+                              <a @click="editResource(item.resourceId)">编辑</a>
                             </a-menu-item>
                             <a-menu-item>
                               <a href="javascript:;">移动到章节</a>
@@ -223,7 +218,7 @@
                               <a href="javascript:;">分享</a>
                             </a-menu-item>
                             <a-menu-item>
-                              <a @click="deletetest(item.testId,'bottom')">删除</a>
+                              <a @click="deleteResource(item.resourceId,'bottom')">删除</a>
                             </a-menu-item>
                           </a-menu>
                         </template>
@@ -235,16 +230,30 @@
                       <a-divider type="vertical" style="height: 60px; border-color: rgb(215, 215, 215)" dashed />
                     </div>
 
-                    <div style="float: right; margin: 1.25vh 0vh 0vh 6vh;cursor: pointer;" v-if="item.publishDate==null">
-                      <div class="change" style="font-size: 3vh;">
-                        <SendOutlined />
+                    <div style="float: right; margin: 3vh 0vh 0vh 6vh;cursor: pointer;" v-if="item.publishDate==null">
+                      <div class="control-item">
+                        <button type="button">
+                          <span>
+                            <i class="item-icon">
+                              <SendOutlined />
+                            </i>
+                            <i class="item-text">
+                              发布
+                            </i>
+                          </span>
+                        </button>
                       </div>
-                      <p>发布</p></div>
+<!--                      <div class="change" style="font-size: 3vh;">-->
+<!--                        <SendOutlined />-->
+<!--                      </div>-->
+<!--                      <p>发布</p>-->
+                    </div>
                   </div>
                 </template>
                 <template #avatar>
                   <a-avatar style="width: 8vh; height: 8vh ;" src="src/assets/image/icon-resource.png"></a-avatar>
-                  <p style="margin-left: 0.3vw;font-size: 16px;">外链</p>
+                  <p style="margin-left: 2.5vh;font-size: 16px;">外链</p>
+<!--                  <p style="margin-top: 1vh; width: 7vh;margin-left: 0.5vh; ">测试</p>-->
                 </template>
               </a-list-item-meta>
             </a-list-item>
@@ -252,19 +261,30 @@
         </a-list>
       </a-card>
     </div>
+    <AddOrEditResource v-if="openSelect1" :openCreate="openSelect1" @updateOpenAdd="updateOpen"/>
   </div>
 
 </template>
 <script lang="ts" setup>
-
-import {LinkOutlined,CheckOutlined,PlusOutlined,EllipsisOutlined,SendOutlined} from '@ant-design/icons-vue';
+// import ResourceList from "/src/components/resource/resourceList.vue";
+import {
+  LinkOutlined,
+  CheckOutlined,
+  PlusOutlined,
+  EllipsisOutlined,
+  SendOutlined,
+  UploadOutlined,
+  ExclamationCircleOutlined
+} from '@ant-design/icons-vue';
 import {userCourseId} from "../../../store/index.js";
-import {onMounted, reactive, ref} from "vue";
+import {onMounted, reactive, ref, createVNode} from "vue";
 import {getDicts} from "../../../api/dict.js";
 import {getChapterByCourse} from "../../../api/chapter.js";
-import {addResourceInfo,getResource} from "../../../api/resource.js";
+import {addResourceInfo,getResourceList,deleteResourceById} from "../../../api/resource.js";
 import {getInfo} from "../../../api/login.js"
 import {ElMessage} from "element-plus";
+import {Modal, notification, NotificationPlacement, CascaderProps} from "ant-design-vue";
+import AddOrEditResource from "@/components/resource/AddOrEditResource.vue";
 
 const toCourseId = userCourseId()
 const id = ref()
@@ -302,32 +322,21 @@ const classProcessList = ref(null);
 const classTypeList = ref(null);
 const chapterList = ref(null);
 const modalTitle = ref('添加资料')
-const selectedOption = ref(null);
+// const selectedOption = ref(null);
 const resourceList = ref(null);
 
 //应用环节的数组
 const processList = ref([]);
 const typeList = ref([]);
 
-const data = [
-  {
-    title: 'Ant Design Title 1',
-    name: 'zs'
-  },
-  {
-    title: 'Ant Design Title 2',
-    name: 'ls'
-  },
-  {
-    title: 'Ant Design Title 3',
-    name: 'ww'
-  },
-  {
-    title: 'Ant Design Title 4',
-    name: 'zl'
-  },
-];
+const selectedChapter = ref([]);
 
+// const options: CascaderProps['chapterList'];
+
+
+const treeProps = {
+  label: "name",
+};
 // 添加资料
 const checked = ref<boolean>(false);
 
@@ -359,7 +368,6 @@ const clearFrom = () => {
   formState.totalScore = 0;
   selectedFile.value = null;
   showTitleError.value = false;
-  selectedOption.value = false;
   typeList.value = [];
   processList.value = [];
 }
@@ -370,19 +378,36 @@ const handleTitleInput = () => {
 }
 
 const openAdd = ref(false);
+
+const openSelect = ref(false);
 const addResource = () => {
-  clearFrom()
-  modalTitle.value = '添加资料'
-  openAdd.value = true;
-  //获取章节信息
-  getChapterByCourseInfo(id.value);
-  formState.createBy = createBy.value;
-  console.log(formState.createBy)
+  if (inputUrl.value==''){
+    showError.value = true;
+  }else{
+    clearFrom()
+    modalTitle.value = '添加资料'
+    //获取章节信息
+    getChapterByCourseInfo(id.value);
+    formState.createBy = createBy.value;
+    formState.path = inputUrl.value;
+    formState.typeLabel = "外链"
+    openLink.value = false;
+    showError.value = false;
+    inputUrl.value = '';
+    openSelect.value = false;
+    openAdd.value = true;
+  }
 }
+// 更换资料
+const changeData = () => {
+  openSelect.value = true;
+}
+
 //获取全部资料
 const getResourceByCourseInfo = (courseId) => {
-  getResource(courseId).then((res) => {
+  getResourceList(courseId).then((res) => {
     resourceList.value = res
+    console.log(res)
     num.value = res.length
   })
 }
@@ -390,8 +415,23 @@ const getResourceByCourseInfo = (courseId) => {
 const getChapterByCourseInfo = (courseId) => {
   getChapterByCourse(courseId).then((res) => {
     chapterList.value = res
+    console.log("章节信息")
     console.log(chapterList.value)
   })
+}
+// 选择章节
+const handleNodeClick = (data) => {
+  formState.chapterId = data.chapterId;
+};
+const handleSelectChange = (chapterId) =>{
+  console.log(chapterId)
+  Object.keys(chapterList.value).forEach((item) => {
+    if (chapterList.value[item].chapterId==chapterId)
+      selectedChapter.value = chapterList.value[item]
+  })
+  console.log("点击的章节详情")
+  console.log(selectedChapter.value)
+  console.log(selectedChapter.value.children)
 }
 
 // 文件上传
@@ -399,20 +439,13 @@ const selectedFile = ref(null);
 const fileContent = ref('');
 const showTitleError = ref(false)
 
-const handleBeforeUpload = (file) =>{
-  selectedFile.value = file;
-  formState.title = selectedFile.value.name;
-  formState.typeLabel = "资料";
-  // 取消默认行为以避免自动上传
-  return false;
-};
-
-
-const handleFileChange = (info) =>{
-  if (info.file.status === 'done') {
-    this.readFileContent();
-  }
-};
+// const handleBeforeUpload = (file) =>{
+//   selectedFile.value = file;
+//   formState.title = selectedFile.value.name;
+//   formState.typeLabel = "资料";
+//   // 取消默认行为以避免自动上传
+//   return false;
+// };
 
 // 添加外链素材
 const openLink = ref<boolean>(false);
@@ -422,17 +455,8 @@ const inputUrl = ref('');
 const showLink = () => {
   openLink.value = true;
 };
-
-
-const submitInputUrlForm = () =>{
-  formState.path = inputUrl.value;
-  formState.typeLabel = "外链"
-  openLink.value = false;
-  showError.value = false;
-  inputUrl.value = '';
-  if (formState.title == ''){
-    showTitleError.value = true
-  }else showTitleError.value = false
+const selectFileOrLink = () =>{
+  openSelect.value = true
 }
 
 const closeinputUrlModal = () =>{
@@ -455,16 +479,48 @@ const handleAddResource = () =>{
   formState.type = typeList.value.join('');
   formState.process = processList.value.join(',');
   openAdd.value = false;
-  console.log(formState)
   addResourceInfo(formState).then((res) =>{
     ElMessage.success(res)
+    getResourceByCourseInfo(formState.courseId)
   })
-  console.log("提交")
-  getResourceByCourseInfo(id.value)
-  console.log("袁教牛逼")
 }
 
-//判断时间
+//删除资料
+const deleteResource = (id,placement: NotificationPlacement) =>{
+  Modal.confirm({
+    title: '提示',
+    icon: createVNode(ExclamationCircleOutlined),
+    content: '确定删除此资料吗？',
+    onOk() {
+      deleteResourceById(id)
+          .then((response) => {
+            // 处理成功响应
+            console.log("删除成功")
+            console.log(response.data);
+            getResourceByCourseInfo(formState.courseId)
+          })
+      notification.open({
+        message: `Notification ${placement}`,
+        description:
+            'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
+        placement,
+      });
+      // location.reload();
+      return new Promise((resolve, reject) => {
+        setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+      }).catch(() => console.log('Oops errors!'));
+
+    },
+    onCancel() {},
+  });
+}
+// 编辑资料
+const editResource = (reSourceId) =>{
+
+}
+
+//工具函数
+  //判断时间
 const isCurrentTimeAfterBackendTime = (deadline) =>{
   const date = new Date(formattedTime)
   const year = date.getFullYear();
@@ -487,10 +543,15 @@ const isCurrentTimeAfterBackendTime = (deadline) =>{
 }
 
 //测试
-const gengduo = (resourceId) =>{
-  console.log(resourceId)
+const openSelect1 = ref(false);
+// 更新子组件创建课程openAdd
+const updateOpen = (value) => {
+  openSelect1.value = value
 }
-
+const CreateResource = () => {
+  openSelect1.value = true;
+  console.log("openSelect1="+openSelect1.value)
+};
 </script>
 <style>
 .Resource_top .Resource_top-left{
@@ -498,7 +559,7 @@ const gengduo = (resourceId) =>{
 }
 .Resource_top .Resource_top-right{
   float: right;
-  margin-right: 17vh;
+  margin-right: 10%;
 }
 .link-top {
   width: 90%;
