@@ -204,7 +204,6 @@ const showTitleError = ref(false)
 // 是否发布
 const checked = ref(false);
 onMounted(()=>{
-  if (editResourceId.value==0){
     console.log("resourceId=0")
     id.value =  toCourseId.getCourseId();
     formState.courseId = id.value
@@ -221,14 +220,7 @@ onMounted(()=>{
       createBy.value = res.user.createBy
       userId.value = res.user.userId
     })
-  }else {
-    console.log("resourceId=else")
-    openSelect1.value = false
-    console.log(openSelect1.value)
-    openAdd.value = true
-    console.log(openAdd.value)
-    getResource(editResourceId.value)
-  }
+
 })
 
 const handleSelect = () =>{
@@ -334,17 +326,17 @@ const cancelAddResource = () => {
 }
 
 /********************************************************编辑资料********/
-const getResource = (resourceId) =>{
-  getOneResource(resourceId).then((res) => {
-    console.log(res)
-    // formState.title = res.title
-    formState.title = res.title
-    formState.typeLabel = res.typeLabel
-    formState.shareProtocol = res.shareProtocol
-    console.log(formState.title)
-    // console.log(formState.value)
-  })
-}
+// const getResource = (resourceId) =>{
+//   getOneResource(resourceId).then((res) => {
+//     console.log(res)
+//     // formState.title = res.title
+//     formState.title = res.title
+//     formState.typeLabel = res.typeLabel
+//     formState.shareProtocol = res.shareProtocol
+//     console.log(formState.title)
+//     // console.log(formState.value)
+//   })
+// }
 
 </script>
 
