@@ -52,7 +52,7 @@
               <p style="display: inline-block;" v-if="item.testLabel==2">考试</p>
             </div>
 
-            <div v-if="item.publishDate == null" style="margin-left: 36h; width: 75vh; height: 15vh; display: inline-block; position: absolute;">
+            <div v-if="item.publishDate == null" style="margin-left: 55.5vh; width: 75vh; height: 15vh; position: absolute;">
                 <div class="ant-dropdown-link" @click.prevent  style="float: right;margin-top: 1.25vh;cursor: pointer;">
                   <a-dropdown>
                   <a style="color: black;">
@@ -477,7 +477,7 @@ const handleOk = (id) => {
           // 处理成功响应
           
           testForm.value = {
-            testId:0,
+            testId:id,
             title: '',
             chapterId:'',
             typeLabel:'测试',
@@ -489,6 +489,7 @@ const handleOk = (id) => {
             course_id:'',
           };
         })
+        location.reload()
       return new Promise((resolve, reject) => {
         setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
       }).catch(() => console.log('Oops errors!'));
