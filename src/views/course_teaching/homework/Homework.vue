@@ -56,7 +56,7 @@
               <a-list-item-meta 
                  :description=item.description>
                  <template v-slot:title>
-                   <a href="#" style="font-size: 16px;">{{ item.title}}</a>
+                   <a @click="JumpToHomeDetail(item.homeworkId)" style="font-size: 16px;">{{ item.title}}</a>
                    <!-- 如果未发布 -->
                    <div v-if="item.showpub" style="float: right;">
                       <a href="#" style="font-size: 26px;margin-right: 1vw;float: left;" @click="editHome(item.homeworkId)">
@@ -114,8 +114,8 @@ import {
 } from '@ant-design/icons-vue';
 import type { SizeType } from 'ant-design-vue/es/config-provider';
 import {onMounted, ref} from 'vue';
+import {useRouter} from "vue-router";
 import {addHomeworkT, deleteHomework, fetchHomeworkData} from "../../../api/homework.js";
-
 import AddHomework from "../../../components/homework/AddHomework.vue";
 import {getUserId,getRoles} from "../../../utils/user-utils.js";
 
@@ -215,6 +215,17 @@ const deleteHome = (homeworkId) => {
 const handleUpdateDisplayAdd = (value) => {
     displayAdd.value = value;
 };
+const router = useRouter();
+const JumpToHomeDetail = (e) => {
+    console.log("作业详情页面")
+    console.log("e：",e)
+    router.push({
+        name: 'NoticeDetail',
+        query:{
+            noticeid:e
+        }
+    })
+}
 onMounted(() => {
     getHomeworkContentInfoAll();
 })
