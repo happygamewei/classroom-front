@@ -298,11 +298,17 @@ export default {
         return;
       }
       if (update.value == false) {
-        addTopic(courseId.value, topic.value, userId.value);
+        addTopic(courseId.value, topic.value, userId.value).then((res) => {
+          //添加或修改成功后，需要刷新页面
+          mitter.emit("refresh", update.value);
+        });
         alert("添加成功");
       } else {
         topic.value.deadline = dayjs(topic.value.deadline);
-        updateTopic(topic.value);
+        updateTopic(topic.value).then((res) => {
+          //添加或修改成功后，需要刷新页面
+          mitter.emit("refresh", update.value);
+        });
         alert("修改成功");
         update.value = false;
       }
@@ -320,8 +326,6 @@ export default {
       topic.value.chapterName = "";
       checked1.value = false;
       checked2.value = false;
-      //添加或修改成功后，需要刷新页面
-      mitter.emit("refresh", update.value);
     };
     const treeProps = {
       label: "name",
