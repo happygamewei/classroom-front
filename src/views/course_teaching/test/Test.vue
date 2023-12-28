@@ -344,7 +344,7 @@
 
           </template>
           <template #avatar>
-            <a-avatar style="width: 7vh; height: 7vh ;" src="src/assets/image/Testlogo.png" />
+            <a-avatar style="width: 7vh; height: 7vh ;" src="src/assets/image/test.png" />
             <p style="margin-top: 1vh; width: 7vh;margin-left: 0.5vh; ">测试</p>
           </template>
         </a-list-item-meta>
