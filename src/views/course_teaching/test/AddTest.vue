@@ -13,7 +13,7 @@
           <el-button v-if="current > 0" type="primary" style="height: 5vh; width: 10vh;margin-left: 8px;" @click="prev">上一步</el-button>
           <el-button v-if="current < 2"  @click="next" type="primary" style="height: 5vh; width: 10vh;float: right;">下一步</el-button>
           <el-button v-if="current > 1"  @click="finish" style="height: 5vh; width: 10vh;float: right;">发布</el-button>
-          <el-button v-if="current > 1" type="primary" style="height: 5vh; width: 10vh;float: right;">保存</el-button>
+          <el-button v-if="current > 1" @click="success" type="primary" style="height: 5vh; width: 10vh;float: right;">保存</el-button>
           <a-modal v-model:open="open"  width="150vh" title="发布测试" @ok="handleOk">
             <hr style="border: 1px solid #ccc">
             <a-form ref="formRef" :model="testForm" style="width: 170vh;margin: auto; margin-top: 4vh;">
@@ -380,7 +380,7 @@
   import '@wangeditor/editor/dist/css/style.css' // 引入 css
   import { AddTest,getAllChapterById } from "../../../api/test"
   import axios from 'axios';
-  import dayjs, { Dayjs } from 'dayjs';
+  import { h } from 'vue';
   import moment from 'moment'
   import { getUserId } from '../../../utils/user-utils';
 
@@ -455,10 +455,38 @@ const disabledDateTime = () => {
 
 
   const next = () => {
-    console.log(current.value)
-    current.value++;
+    if (!testForm.value.title) {
+      alert("测试标题为空");
+    } else {
+      current.value++;
+    }
   };
-
+  const success = () => {
+    AddTest(testForm.value)
+    .then((response) => {
+          // 处理成功响应
+          console.log(response.data);
+          testForm.value = {
+            title: '',
+            chapterId:'',
+            userId:userId,
+            typeLabel:'测试',
+            shareProtocol:'',
+            testLabel:1,
+            process:'',
+            publishDate:'',
+            deadline:'',
+            course_id:courseId.value,
+          };
+        })
+  Modal.success({
+    title: 'Success',
+    content: h('div', {}, [
+      h('p', '试卷已实时保存'),
+    ]),
+  });
+  router.go(-1);
+};
 
   const prev = () => {
     current.value--;
@@ -466,7 +494,6 @@ const disabledDateTime = () => {
 
   const finish = () =>{
     open.value = true;
-
   }
 const handleOk = (e: MouseEvent) => {
   console.log(e);
@@ -493,7 +520,7 @@ const handleOk = (e: MouseEvent) => {
             course_id:courseId.value,
           };
         })
-        location.reload();
+        router.go(-1);
       return new Promise((resolve, reject) => {
         setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
       }).catch(() => console.log('Oops errors!'));
@@ -523,6 +550,7 @@ const handleOk = (e: MouseEvent) => {
   { id: 6, pId: 0, value: '6', title: '署名-非商业-禁止演绎（CC-BY-NC-ND）' },
   { id: 7, pId: 0, value: '7', title: '署名-非商业-相同方式共享（CC-BY-NC-SA）' },
 ]);
+
 
 const tabList = [
 {
