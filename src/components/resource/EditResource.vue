@@ -362,18 +362,20 @@ const getResource = (resourceId) =>{
     formState.process = res.process
     formState.chapterId = res.chapterId
     formState.type = res.type
-    formState.publishDate = moment(res.publishDate).format('YYYY-MM-DD HH:mm:ss');
-    formState.deadline = moment(res.deadline).format('YYYY-MM-DD HH:mm:ss');
+    // if (res.publishDate!=)
+    console.log(res.publishDate)
+    if (res.publishDate!=null){
+      checked.value = true
+      formState.publishDate = moment(res.publishDate).format('YYYY-MM-DD HH:mm:ss');
+      formState.deadline = moment(res.deadline).format('YYYY-MM-DD HH:mm:ss');
+    }
     formState.totalScore = res.totalScore
     formState.resourceId = res.resourceId
     formState.userId = res.userId
     formState.createBy = res.createBy
-    formState.createTime = res.createTime
     formState.createTime = moment(res.createTime).format('YYYY-MM-DD HH:mm:ss');
     formState.updateBy = createBy.value
     console.log(formState.publishDate)
-    if (formState.publishDate!=Invaliddate)
-      checked.value = true
   })
 }
 
