@@ -59,13 +59,13 @@
                    <a href="#" style="font-size: 16px;">{{ item.title}}</a>
                    <!-- 如果未发布 -->
                    <div v-if="item.showpub" style="float: right;">
-                      <a href="#" style="font-size: 26px;margin-right: 1vw;float: left;">
+                      <a href="#" style="font-size: 26px;margin-right: 1vw;float: left;" @click="editHome(item.homeworkId)">
                         <SendOutlined />
                         <p style="font-size: 16px;color: black;margin-left:-0.3vw;">发布</p>
                       </a>
                       <a href="#" style="font-size: 26px;margin-right: 1vw;float: left;">
                         <EllipsisOutlined />
-                        <p style="font-size: 16px;color: black;margin-left:-0.3vw;">更多</p>
+                        <p style="font-size: 16px;color: black;margin-left:-0.3vw;" @click="deleteHome(item.homeworkId)">删除</p>
                       </a>
                    </div>
                    <div v-else="item.showpub"  style="float:right;">
@@ -81,6 +81,10 @@
                         {{ item.unpaid}}
                         <p style="font-size: 16px;color: black;margin-left:-0.7vw;">未交</p>
                       </a>
+                       <a href="#" style="font-size: 26px;margin-right: 1vw;float: left;">
+                           <EllipsisOutlined />
+                           <p style="font-size: 16px;color: black;margin-left:-0.3vw;"  @click="deleteHome(item.homeworkId)">删除</p>
+                       </a>
                    </div>
                  </template>
                  <template #avatar>
@@ -94,7 +98,7 @@
       </a-list>
   </a-card>
 
-    <AddHomework  :displayAdd=displayAdd @update:displayAdd="handleUpdateDisplayAdd"></AddHomework>
+    <AddHomework v-if="displayAdd" :displayAdd=displayAdd @update:displayAdd="handleUpdateDisplayAdd" :homeworkId="homeworkid" :form="addStateForm"></AddHomework>
 
 
 
@@ -110,11 +114,10 @@ import {
 } from '@ant-design/icons-vue';
 import type { SizeType } from 'ant-design-vue/es/config-provider';
 import {onMounted, ref} from 'vue';
-import {fetchHomeworkData} from "../../../api/homework.js";
+import {addHomeworkT, deleteHomework, fetchHomeworkData} from "../../../api/homework.js";
 
-import AddHomework from "./AddHomework.vue";
+import AddHomework from "../../../components/homework/AddHomework.vue";
 import {getUserId,getRoles} from "../../../utils/user-utils.js";
-
 
 
 
@@ -175,7 +178,8 @@ function fullList(homeworkList){
           approved:`${homeworkList.value[i].approved}` === "null"? `0` : `${homeworkList.value[i].approved}`,
           //这个是总人数减去未交的再减去已批的
           unapproved:`${homeworkList.value[i].approved}` === "null"? `0` : `${homeworkList.value[i].approved}`,
-          showpub:homeworkList.value[i].ifPublish === 0?false:true,
+          showpub:homeworkList.value[i].ifPublish === "0"?true:false,
+          homeworkId: homeworkList.value[i].homeworkId,
       })
     }
 
@@ -183,14 +187,32 @@ function fullList(homeworkList){
 
 
 const displayAdd = ref(false)
+const homeworkid = ref("")
+const addStateForm = ref({})
 const addHome = () => {
+    displayAdd.value = false;
     displayAdd.value = true;
-    console.log(displayAdd.value)
     userid.value = getUserId();
     role.value = getRoles();
+    displayAdd.value = false;
+}
+const editHome = (homeworkId) => {
+    displayAdd.value = false;
+    displayAdd.value = true;
+    userid.value = getUserId();
+    role.value = getRoles();
+    homeworkid.value = homeworkId;
+    addStateForm.value = homeworkList.value[homeworkId-1];
+}
+const deleteHome = (homeworkId) => {
+    deleteHomework(homeworkId).then((res)=>{
+        console.log(res);
+        location.reload();
+    }).catch(err => {
+        console.error(err);
+    });
 }
 const handleUpdateDisplayAdd = (value) => {
-    console.log("aaa")
     displayAdd.value = value;
 };
 onMounted(() => {
