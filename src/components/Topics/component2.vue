@@ -46,10 +46,12 @@
                   class="issue"
                   v-if="item.publishDate == null && userRole == 'admin'"
                 >
-                  <send-outlined @click="issue(item.topicId)" />发布
+                  <div class="issue1">
+                    <send-outlined @click="issue(item.topicId)" />发布
+                  </div>
                 </div>
                 <div class="more" v-if="userRole == 'admin'">
-                  <p style="font-size: 2vh">更多</p>
+                  <p style="font-size: 2vh" class="more1">更多</p>
                   <el-popover
                     placement="right"
                     :width="50"
@@ -111,7 +113,7 @@ export default {
     const userId = ref();
     const isPost = ref();
     const showMode = ref(true);
-    const key = ref(0);
+    const key = ref(false);
     const count = ref(0);
     const option = ref();
     const userRole = ref("");
@@ -185,8 +187,9 @@ export default {
       });
     };
     const deleteTopic = (topicId) => {
-      deleteTopicById(topicId);
-      mitter.emit("refresh", key.value);
+      deleteTopicById(topicId).then((res) => {
+        mitter.emit("refresh", key.value);
+      });
     };
     const issue = (topicId) => {
       const topic = getDetail(topicId);
@@ -243,24 +246,27 @@ export default {
   font-family: 楷书;
   font-weight: bolder;
   font-size: 22px;
+  margin-left: -110vh;
 }
 .content1 {
   font-size: 13px;
   padding-top: 5vh;
-  margin-left: 10vh;
+  margin-left: -90vh;
 }
 .content2 {
   margin-top: 4vh;
-  margin-left: -105vh;
+  margin-left: -110vh;
   font-size: smaller;
 }
 .more {
-  margin-right: -120vh;
-  margin-top: -3vh;
+  margin-right: -130vh;
 }
 .issue {
-  margin-top: -7vh;
-  margin-right: -110vh;
+  position: relative;
+}
+.issue1 {
+  position: absolute;
+  right: 10vh;
 }
 .totalCount {
   position: relative;

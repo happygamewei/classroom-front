@@ -1,5 +1,5 @@
-<template>
-<div style="float: left;">共{{ num }}个活动</div>
+<template >
+<div  :key="TestKey" style="float: left;">共{{ num }}个活动</div>
 <div v-if="roles == 'admin'" style="margin-right: 18vh;"><el-button @click="addtest" style="width: 17vh; height: 5vh;" class="a" type="success" ><PlusOutlined />添加测试</el-button></div>
 
 <div v-if="roles == 'admin'" class="a">  <el-button type="primary" style="width: 17vh; height: 5vh;"><CheckOutlined />批量操作</el-button> </div>
@@ -8,7 +8,7 @@
 </div>
 
 
-<div v-if="roles == 'admin'" class="a"  style=" color: rgb(83, 133, 250); margin: 1vh 0vh 0vh 20vh;">
+<div  :key="TestKey" v-if="roles == 'admin'" class="a"  style=" color: rgb(83, 133, 250); margin: 1vh 0vh 0vh 20vh;">
   <a-dropdown>
     <a class="ant-dropdown-link" @click.prevent style=" color: rgb(83, 133, 250); margin: 1vh 0vh 0vh 20vh;">
       <OrderedListOutlined />
@@ -37,14 +37,14 @@
     <a-list item-layout="horizontal">
 
 
-    <template v-if="roles == 'admin'" v-for="item in TestList" :key="testId">
+    <template v-if="roles == 'admin'" v-for="item in TestList" :key="TestKey">
       <a-list-item v-if="item.course_id == courseId">
         <a-list-item-meta
           description=" ">
           <template #title>
-            <div @click="testContent(item.testId)" style="height: 12vh;width: 28vh;cursor: pointer;">
-              <a  style=" font-size: large;width: 10vh; margin: 2vh 0vh 0vh 3vh; float: left;color: black;">{{ item.title }}</a>
-            <div style="float: left; position: absolute;">
+            <div style="height: 12vh;width: 28vh;cursor: pointer;">
+              <a @click="testContent(item.testId)" style=" font-size: large;width: 10vh; margin: 2vh 0vh 0vh 3vh; float: left;color: black;">{{ item.title }}</a>
+            <div @click="testContent(item.testId)" style="float: left; position: absolute;">
               <p style="display: inline-block; margin: 7vh 2vh 0vh 3vh;">截至时间:
                 <p style="display: inline-block;" v-if="item.deadline==null"> &nbsp不限 &nbsp</p>
                 <p style="display: inline-block;">{{ item.deadline }}</p> &nbsp|</p>
@@ -63,7 +63,7 @@
                   <template #overlay>
                     <a-menu>
                       <a-menu-item>
-                        <a @click="Edit">编辑</a>
+                        <a @click="Edit(item.testId)">编辑</a>
                       </a-menu-item>
                       <a-menu-item>
                         <a href="javascript:;">移动到章节</a>
@@ -86,11 +86,12 @@
                   <a-divider type="vertical" style="height: 60px; border-color: rgb(215, 215, 215)" dashed />
                 </div>
 
-                <div style="float: right; margin: 1.25vh 0vh 0vh 6vh;cursor: pointer;">
+                <div @click="Edit(item.testId)"  style="float: right; margin: 1.25vh 0vh 0vh 6vh;cursor: pointer;">
                   <div class="change" style="font-size: 3vh;">
                     <SendOutlined />
                   </div>
-                  <p>发布</p></div>
+                  <p>发布</p>
+                </div>
             </div>
               <div v-if="item.publishDate != null" style="margin-left: 38vh; width: 75vh; height: 15vh; display: inline-block; position: absolute;">
                 <div style="float: left; margin-top: 1.25vh;cursor: pointer;">
@@ -176,7 +177,7 @@
                 </a-dropdown>
 
 
-                  <a-modal v-model:open="open"  width="150vh" title="编辑测试" @ok="handleOk" >
+                  <a-modal v-model:open="open"  width="150vh" title="编辑/发布测试" @ok="handleOk(item.testId)">
                     <hr style="border: 1px solid #ccc">
                     <a-form ref="formRef" :model="testForm" style="width: 170vh;margin: auto; margin-top: 4vh;">
                       <a-form-item
@@ -187,8 +188,9 @@
                         <a-input style="display: inline-block; margin-right: 7vh; width: 131vh;
                         height: 5vh;" v-model:value="testForm.title" placeholder="请输入内容，最多50字"  />
                       </a-form-item>
+
                       <a-form-item style="width: 142vh;">
-                        <div style="border: 1px solid #ccc">
+                        <div style="border: 1px solid #ccc;">
                           <Toolbar
                             style="border-bottom: 1px solid #ccc"
                             :editor="editorRef"
@@ -237,7 +239,7 @@
                           <a-tree-select
                             v-model:value="testForm.shareProtocol"
                             style="width: 33vh;"
-                            :tree-data="treeData"
+                            :tree-data="treeData1"
                             placeholder="请选择" />
                             <p style="display: inline-block; font-size:larger"> &nbsp &nbsp</p>
                             <QuestionOutlined />
@@ -258,23 +260,7 @@
                           :render-after-expand="false"
                           :props="treeProps"
                         >
-                        </el-tree-select>
-                        <template #overlay>
-                          <a-menu>
-                            <a-menu-item>1st menu item</a-menu-item>
-                            <a-menu-item>2nd menu item</a-menu-item>
-                            <a-sub-menu key="sub1" title="sub menu">
-                              <a-menu-item>3rd menu item</a-menu-item>
-                              <a-menu-item>4th menu item</a-menu-item>
-                            </a-sub-menu>
-                            <a-sub-menu key="sub2" title="disabled sub menu" disabled>
-                              <a-menu-item>5d menu item</a-menu-item>
-                              <a-menu-item>6th menu item</a-menu-item>
-                            </a-sub-menu>
-                          </a-menu>
-                        </template>
-
-
+                        </el-tree-select>>
                       </a-form-item>
                     </b>
                     </div>
@@ -300,10 +286,13 @@
                             style="margin-top: 16vh;margin-left: 3vh;"
                               label="开始时间"
                               name="publish_date"
-                              :rules="[{ required: true }]"
                             >
                             <a-space direction="vertical" :size="12">
-                              <a-date-picker v-model:value="testForm.publishDate" :format="dateFormat" style="width: 33vh;" />
+                              <a-date-picker
+                                :format="dateFormat"
+                                :show-time="{ format: 'HH:mm:ss' }"
+                                style="width: 33vh;"
+                              />
                             </a-space>
                             </a-form-item>
                         </b>
@@ -317,7 +306,11 @@
                               name="deadline"
                             >
                             <a-space direction="vertical" :size="12">
-                              <a-date-picker style="width: 33vh;" v-model:value="testForm.deadline" />
+                              <a-date-picker
+                                :format="dateFormat"
+                                :show-time="{ format: 'HH:mm:ss' }"
+                                style="width: 33vh;"
+                              />
                             </a-space>
                             </a-form-item>
                         </b>
@@ -376,7 +369,7 @@
 
           </template>
           <template #avatar>
-            <a-avatar style="width: 8vh; height: 8vh ;" src="src/assets/image/Testlogo.png" />
+            <a-avatar style="width: 8vh; height: 8vh ;" src="../../../assets/image/Testlogo.png" />
             <p style="margin-top: 1vh; width: 7vh;margin-left: 0.5vh; ">测试</p>
           </template>
         </a-list-item-meta>
@@ -390,11 +383,11 @@
 
 </template>
 <script lang="ts" setup>
-import { onMounted, ref, shallowRef,onBeforeUnmount,createVNode} from 'vue';
+import { onMounted, ref, shallowRef,onBeforeUnmount,createVNode, inject} from 'vue';
 import { OrderedListOutlined,DownloadOutlined,PlusOutlined,EyeOutlined,
   CustomerServiceOutlined,ClockCircleOutlined,EllipsisOutlined,QuestionOutlined,CheckOutlined,
   ExclamationCircleOutlined,SendOutlined } from '@ant-design/icons-vue';
-import { Card,Modal,notification,NotificationPlacement,TreeSelectProps } from 'ant-design-vue';
+import { Card,Modal,NotificationPlacement,TreeSelectProps } from 'ant-design-vue';
 import axios from 'axios';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
@@ -402,6 +395,7 @@ import { useRoute,useRouter } from 'vue-router';
 import { getAllTest,GetNotCorrected,DeleteTest,EditTest,SelectTest,getAllChapterById } from '../../../api/test.js';
 import {getRoles} from '../../../utils/user-utils.js';
 import { userCourseId } from "../../../store/index.js";
+import Vue from 'vue/dist/vue.js';
 
 const route = useRoute();
 const num = ref(0)
@@ -414,8 +408,10 @@ const courseId = ref();
 const open = ref<boolean>(false);
 const toCourseId = userCourseId();
 const dateFormat = 'YYYY-MM-DD HH:mm:ss';
-
-
+const TestKey = ref(0)
+const treeData = ref([]);
+const publishDateValue = ref('');
+const deadlineValue = ref('');
 
 const deletetest = (id,placement: NotificationPlacement) =>{
   Modal.confirm({
@@ -428,13 +424,13 @@ const deletetest = (id,placement: NotificationPlacement) =>{
           // 处理成功响应
           console.log(response.data);
         })
-        notification.open({
-          message: `Notification ${placement}`,
-          description:
-            'This is the content of the notification. This is the content of the notification. This is the content of the notification.',
-          placement,
-        });
-        location.reload();
+        // 更新数据
+        TestList.value = TestList.value.filter(item => item.testId !== id);
+        num.value -= 1; // 更新活动数量
+        // 手动触发重新渲染
+        console.log("更新前："+TestKey.value)
+        TestKey.value++;
+        console.log("更新后："+TestKey.value)
       return new Promise((resolve, reject) => {
         setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
       }).catch(() => console.log('Oops errors!'));
@@ -443,8 +439,64 @@ const deletetest = (id,placement: NotificationPlacement) =>{
     onCancel() {},
   });
 }
+
+const Edit = (id) =>{
+    open.value = true;
+    SelectTest(id)
+        .then((responseData) => {
+            const testData = JSON.parse(responseData);
+            // console.log(testData); // 在这里处理获取到的测试数据
+            testForm.value = {
+                testId: id,
+                title: testData.title,
+                chapterId: testData.chapterId,
+                typeLabel: testData.typeLabel,
+                shareProtocol: testData.shareProtocol,
+                testLabel: testData.testLabel,
+                process: testData.process,
+                publishDate: testData.publishDate,
+                deadline: testData.deadline,
+                course_id: testData.course_id,
+            };
+        })
+
+  }
+
+const handleOk = (id) => {
+  open.value = false;
+  Modal.confirm({
+    title: '请确认是否发布该测试？',
+    icon: createVNode(ExclamationCircleOutlined),
+    content: '目前该测试正在 进行中,若点击”确定保存“ 可能会影响学生的答题数据，请谨慎修改！' ,
+    onOk() {
+      EditTest(testForm.value)
+      .then((response) => {
+          // 处理成功响应
+          
+          testForm.value = {
+            testId:0,
+            title: '',
+            chapterId:'',
+            typeLabel:'测试',
+            shareProtocol:'',
+            testLabel:1,
+            process:'',
+            publishDate:'',
+            deadline:'',
+            course_id:'',
+          };
+        })
+      return new Promise((resolve, reject) => {
+        setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+      }).catch(() => console.log('Oops errors!'));
+
+    },
+    onCancel() {},
+  });
+};
+
 const testForm = ref({
-    testid:'',
+    testId:0,
     title: '',
     chapterId:'',
     typeLabel:'测试',
@@ -468,7 +520,7 @@ getAllChapterById(courseId.value).then((res) =>{
 })
   getAllTest().then((res) => {
   TestList.value = res;
-  console.log(res+"0000000")
+
   num.value = res.length;
   setTimeout(() => {
         valueHtml.value = '<p> </p>'
@@ -496,51 +548,6 @@ const testContent = (testId) =>{
   })
 
 }
-
-const Edit = (id) =>{
-    open.value = true;
-    SelectTest(id)
-    .then((response) =>{
-      console.log(response.data)
-    })
-
-  }
-
-const handleOk = (e: MouseEvent) => {
-  open.value = false;
-  Modal.confirm({
-    title: '请确认是否发布该测试？',
-    icon: createVNode(ExclamationCircleOutlined),
-    content: '目前该测试正在 进行中,若点击”确定保存“ 可能会影响学生的答题数据，请谨慎修改！' ,
-    onOk() {
-      EditTest(testForm.value)
-      .then((response) => {
-          // 处理成功响应
-          console.log(response.data);
-          testForm.value = {
-            testid:'',
-            title: '',
-            chapterId:'',
-            typeLabel:'测试',
-            shareProtocol:'',
-            testLabel:1,
-            process:'',
-            publishDate:'',
-            deadline:'',
-            course_id:'',
-          };
-        })
-        location.reload();
-      return new Promise((resolve, reject) => {
-        setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
-      }).catch(() => console.log('Oops errors!'));
-
-    },
-    onCancel() {},
-  });
-};
-
-const mode = "default"
 const Process = ref<TreeSelectProps['treeData']>([
   { id: 1, pId: 0, value: '1', title: '课前' },
   { id: 2, pId: 0, value: '2', title: '课中' },
@@ -550,7 +557,7 @@ const Process = ref<TreeSelectProps['treeData']>([
 ]);
 
 
-  const treeData = ref<TreeSelectProps['treeData']>([
+  const treeData1 = ref<TreeSelectProps['treeData']>([
   { id: 1, pId: 0, value: '1', title: '不使用' },
   { id: 2, pId: 0, value: '2', title: '署名（CC-BY）' },
   { id: 3, pId: 0, value: '3', title: '署名-相同方式共享（CC-BY-SA）' },
@@ -561,9 +568,9 @@ const Process = ref<TreeSelectProps['treeData']>([
 ]);
 
 
-
-  // 编辑器实例，必须用 shallowRef
-  const editorRef = shallowRef()
+const mode = "default"
+   // 编辑器实例，必须用 shallowRef
+   const editorRef = shallowRef()
 
 // 内容 HTML
 const valueHtml = ref('')
@@ -582,10 +589,10 @@ onBeforeUnmount(() => {
 const handleCreated = (editor) => {
   editorRef.value = editor // 记录 editor 实例，重要！
 }
-
 </script>
 
 <style>
+
 .a{
   float: right;
   margin-left: 5vh;

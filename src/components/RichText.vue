@@ -18,11 +18,14 @@
 <script>
 import '@wangeditor/editor/dist/css/style.css' // 引入 css
 
-import { onBeforeUnmount, ref, shallowRef, onMounted } from 'vue'
+import { onBeforeUnmount, ref, shallowRef, onMounted,watch} from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 
 export default {
   components: { Editor, Toolbar },
+    props: {
+        valueHtml: String,
+    },
   setup() {
     // 编辑器实例，必须用 shallowRef
     const editorRef = shallowRef()
@@ -38,7 +41,12 @@ export default {
 
     const toolbarConfig = {}
     const editorConfig = { placeholder: '请输入内容...' }
-
+      watch(
+          () => valueHtml.value,
+          (newValue) => {
+              valueHtml.value = newValue;
+          }
+      );
     // 组件销毁时，也及时销毁编辑器
     onBeforeUnmount(() => {
         const editor = editorRef.value

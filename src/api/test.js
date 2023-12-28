@@ -35,13 +35,13 @@ export async function AddTest(data){
 
 //修改测试
 export async function EditTest(data){
-
-    return request({
-        url: '/classroom/test/EditTest',
-        method: 'post',
-        data: data
-      })
-
+    console.log(data+"2222222222")
+    // return request({
+    //     url: '/classroom/test',
+    //     method: 'put',
+    //     data: data
+    //   })
+const res =await request.put('classroom/test',data)
 }
 
 //删除测试
@@ -58,9 +58,9 @@ export async function SelectTest(id){
 
     const res = await request.get('/classroom/test/selectTest/'+id)
     if(res.code === 200){
-        return res.data
+        console.log(JSON.stringify(res.data))
+        return JSON.stringify(res.data)
     }
-
     return Promise.reject(new Error(res.msg))
     // return request({
     //     url:'/classroom/test/selectTest/'+id,

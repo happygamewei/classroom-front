@@ -1,13 +1,13 @@
 <template>
   <!-- 添加作业或修改发布作业对话框 -->
     <template>
-        <a-modal v-model:open="displaya"  :title="homeTitle" @ok="handleOk" width="70vw" cancelText="取消" okText="确定">
+        <a-modal v-model:open="displayaa"  :title="homeTitle" @ok="handleOk" width="70vw" cancelText="取消" okText="确定">
             <a-card >
                 <a-form ref="formRef" :model="addFormState" :label-col="labelCol" :wrapper-col="wrapperCol">
                     <div>
                         <a>导入作业</a>
                     </div>
-                    <a-form-item label="作业类型" name="resource" :rules="resource">
+                    <a-form-item label="作业类型" name="resource" :rules="[{ required: true, message: ' ', trigger: 'change' }]">
                         <a-radio-group v-model:value="resource">
                             <a-radio value="1">个人作业</a-radio>
                             <a-radio value="2">小组作业</a-radio>
@@ -18,7 +18,7 @@
                     </a-form-item>
                     <a-form-item name="content" v-model="addFormState.content"   :rules="[{ required: true, message: '请输入作业内容!'}]"
                                  style="margin-left: 4vw;">
-                        <RichText />
+                        <RichText v-model="addFormState.content" :valueHtml="addFormState.content" />
                     </a-form-item>
 
                     <a-card>
@@ -105,21 +105,14 @@
 import {
     QuestionOutlined, ExclamationCircleOutlined
 } from '@ant-design/icons-vue';
-import {createVNode, onMounted, reactive, ref, defineEmits, watch} from 'vue';
-import {addHomeworkT} from "../../../api/homework.js";
-import RichText from '../../../components/RichText.vue';
+import {createVNode, onMounted, reactive, ref, defineEmits, watchEffect} from 'vue';
+import {addHomeworkT, getHomeworkById, updateHomework} from "../../api/homework.js";
+import RichText from '../../components/RichText.vue';
 import { TreeSelectProps,Modal, message } from 'ant-design-vue';
-import {getUserId,getRoles} from "../../../utils/user-utils.js";
+import {getUserId,getRoles} from "../../utils/user-utils.js";
 // 在子组件中通过 props 接收变量
 
 
-const display = defineProps(['displayAdd']);
-const displaya =  ref(display.displayAdd)
-watch(() => {
-    displaya.value = display.displayAdd
-})
-const emit = defineEmits();
-const resource = ref([{ required: true, message: ' ', trigger: 'change' }]);
 //添加作业
 const formRef = ref();
 const homeTitle = ref('添加作业')
@@ -169,14 +162,59 @@ const addFormState = reactive({
     updateTime:  '',
     remark: '',
 })
+const display = defineProps(['displayAdd','homeworkId','form']);
+const displaya =  ref(display.displayAdd)
+const displayaa = ref(true)
+const homeworkIda = ref(display.homeworkId)
 
+watchEffect(() => {
+    displaya.value = display.displayAdd;
+    homeworkIda.value = display.homeworkId;
+
+    // 如果 homeworkId 有值，进行查值操作
+    if (homeworkIda.value != "") {
+            try {
+                console.log("aaa")
+                addFormState.title = display.form.title;
+                addFormState.homeworkId = display.form.homeworkId;
+                addFormState.content = display.form.content;
+                addFormState.typeLabel = display.form.typeLabel;
+                addFormState.shareProtocol = display.form.shareProtocol;
+                addFormState.process = display.form.process;
+                addFormState.chapterId = display.form.chapterId;
+                addFormState.ifPublish = display.form.ifPublish;
+                addFormState.publishDate = display.form.publishDate;
+                addFormState.deadline = display.form.deadline;
+                addFormState.totalScore = display.form.totalScore;
+                addFormState.approved = display.form.approved;
+                addFormState.unpaid = display.form.unpaid;
+                addFormState.checkNumber = display.form.checkNumber;
+                addFormState.ifBack = display.form.ifBack;
+                addFormState.status = display.form.status;
+                addFormState.createBy = display.form.createBy;
+                addFormState.createTime = display.form.createTime;
+                addFormState.updateBy = display.form.updateBy;
+                addFormState.updateTime = display.form.updateTime;
+                addFormState.remark = display.form.remark;
+                delivery.value  = addFormState.ifPublish.toString() === "1" ? true : false;
+                isCheck.value = addFormState.isCheck.toString() === "1" ? true : false;
+                ifBack.value = addFormState.ifBack.toString() === "1" ? true : false;
+            } catch (error) {
+                console.error(error);
+            }
+    }
+});
+const emit = defineEmits(["displayAdd"]);
+const resource = ref("1");
 
 //提交,返回更改父组件displayAdd失败
 const handleOk = e => {
     userid.value = getUserId();
     role.value = getRoles();
     displaya.value = false;
-    emit('update:displayAdd', 'false');
+    displayaa.value = false;
+    emit("update:displayAdd", false)
+    console.log(displaya)
     addFormState.ifPublish = delivery.value ? 1 : 0;
     addFormState.isCheck = isCheck.value ? 1 : 0;
     addFormState.ifBack = ifBack.value ? 1 : 0;
@@ -184,19 +222,33 @@ const handleOk = e => {
         title: '请确认是否发布该作业？',
         icon: createVNode(ExclamationCircleOutlined),
         onOk() {
-            addHomeworkT(addFormState).then((res)=>{
-                console.log(addFormState);
-                console.log(res);
-                location.reload();
-            }).catch(err => {
-                console.error(err);
-            });
-
+            if (homeworkIda === ""){
+                addHomeworkT(addFormState).then((res)=>{
+                    console.log(addFormState);
+                    console.log(res);
+                    location.reload();
+                }).catch(err => {
+                    console.error(err);
+                });
+            }else {
+                addFormState.ifPublish = 1;
+                updateHomework(addFormState).then((res) =>{
+                    console.log(addFormState);
+                    console.log(res);
+                    location.reload();
+                }).catch(err => {
+                    console.error(err);
+                });
+            }
             return new Promise((resolve, reject) => {
                 setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
             }).catch(() => console.log('Oops errors!'));
         },
-        onCancel() {},
+        onCancel() {
+            this.open = false;
+            reset()
+
+        },
     });
 }
 
@@ -207,7 +259,35 @@ onMounted(() => {
     delivery.value = false;
     isCheck.value = false;
     ifBack.value = false;
+
 })
+const reset = () => {
+    this.addFormState = {
+        homeworkId: "",
+        title: '',
+        content: '',
+        userId: userid,
+        typeLabel: '',
+        shareProtocol: '',
+        process: '',
+        chapterId: 0,
+        ifPublish:  0,
+        publishDate: '',
+        deadline: '',
+        totalScore: 0,
+        approved: 0,
+        unpaid: 0,
+        isCheck: 0,
+        checkNumber:  0,
+        ifBack: 0,
+        status: 0,
+        createBy: '',
+        createTime: '',
+        updateBy: '',
+        updateTime:  '',
+        remark: '',
+    }
+}
 
 const labelCol = {
     style: {

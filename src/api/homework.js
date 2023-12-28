@@ -15,3 +15,22 @@ export async function addHomeworkT(data) {
         data: data
     })
 }
+export async function getHomeworkById(homeworkId) {
+    return request({
+        url: '/classroom/homework/seach/'+homeworkId,
+        method: 'post',
+    })
+}
+export async function updateHomework(data) {
+    return request({
+        url: '/classroom/homework/EditHomework',
+        method: 'put',
+        data: data
+    })
+}
+export async function deleteHomework(homeworkId) {
+    return request({
+        url: '/classroom/homework/' + homeworkId,
+        method: 'delete'
+    })
+}
