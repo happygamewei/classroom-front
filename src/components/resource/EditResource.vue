@@ -19,7 +19,7 @@
       </a-space>
     </a-modal>
   </div>
-  <a-modal v-model:open="openAdd" :title="modalTitle" @ok="handleAddResource" @cancel="cancelAddResource" width="50vw" cancelText="取消" okText="确定" zIndex="1000">
+  <a-modal v-model:open="openEdit" :title="modalTitle" @ok="handleEditResource" @cancel="cancelAddResource" width="50vw" cancelText="取消" okText="确定" zIndex="1000">
     <div style="margin-top: 3vh">
       <a-form :model="formState" :label-col="labelCol" :wrapper-col="wrapperCol">
         <a-form-item label="资料标题" :rules="[{ required: true, message: '请输入资料标题' }]">
@@ -57,7 +57,7 @@
         <a-row>
           <a-col :span="12">
             <a-form-item label="应用环节">
-              <a-select placeholder="请选择" v-model:value="processList" style="width: 15vw" mode="multiple">
+              <a-select placeholder="请选择" v-model:value="formState.process" style="width: 15vw">
                 <a-select-option :value="item.dictLabel" v-for="item in classProcessList" :key="item.dictCode">
                   {{item.dictLabel}}
                 </a-select-option>
@@ -79,7 +79,7 @@
           </a-col>
         </a-row>
         <a-form-item label="类型">
-          <a-select placeholder="请选择" v-model:value="typeList" style="width: 15vw" mode="multiple">
+          <a-select placeholder="请选择" v-model:value="formState.type" style="width: 15vw">
             <a-select-option :value="item.dictCode" v-for="item in classTypeList" :key="item.dictCode">
               {{item.dictLabel}}
             </a-select-option>
@@ -121,33 +121,36 @@ import {
 import {ref, reactive, onMounted} from 'vue';
 import {getDicts} from "@/api/dict.js";
 import {getChapterByCourse} from "@/api/chapter.js";
-import {addResourceInfo, getOneResource} from "@/api/resource.js";
+import {addResourceInfo, getOneResource, editResource} from "@/api/resource.js";
 import {ElMessage} from "element-plus";
 import { message } from 'ant-design-vue';
 import {userCourseId} from "@/store/index.js";
 import {getInfo} from "@/api/login.js";
 const props = defineProps({
-  openCreate: {
+  openEdit: {
     type: [Boolean]
   },
-  openEdit: {
+  openEditId: {
     type: [Number]
+  },
+  openPublish: {
+    type: [Boolean]
   }
 })
 
-const emit = defineEmits(["updateOpenAdd"]);
+const emit = defineEmits(["updateOpenEdit"]);
 const toCourseId = userCourseId()
 const id = ref()
 const createBy = ref();
 const userId = ref(0)
 // 是否显示
 const openSelect1 = ref(false);
-const openAdd = ref(false);
+const openEdit = ref(false);
 const editResourceId = ref(0)
-
-openSelect1.value = props.openCreate
-editResourceId.value = props.openEdit
-
+const checked = ref(false);
+openEdit.value = props.openEdit
+editResourceId.value = props.openEditId
+checked.value = props.openPublish
 const classShareProtoco = 'class_share_protoco'
 const classProcess = 'class_process'
 const classType = 'class_type'
@@ -156,7 +159,7 @@ const classShareProtocoList = ref(null);
 const classProcessList = ref(null);
 const classTypeList = ref(null);
 const chapterList = ref(null);
-const modalTitle = ref('添加资料')
+const modalTitle = ref('编辑资料')
 // const selectedOption = ref(null);
 const resourceList = ref(null);
 
@@ -165,7 +168,7 @@ const processList = ref([]);
 const typeList = ref([]);
 
 const formState = reactive({
-  // resourceId:0,
+  resourceId:0,
   courseId:'',
   title: '',
   path:'',
@@ -202,33 +205,49 @@ const clearFrom = () => {
 const showTitleError = ref(false)
 
 // 是否发布
-const checked = ref(false);
+
 onMounted(()=>{
-  if (editResourceId.value==0){
-    console.log("resourceId=0")
-    id.value =  toCourseId.getCourseId();
-    formState.courseId = id.value
-    getDicts(classShareProtoco).then(res =>{
-      classShareProtocoList.value = res;
-    })
-    getDicts(classProcess).then(res =>{
-      classProcessList.value = res;
-    })
-    getDicts(classType).then(res =>{
-      classTypeList.value = res;
-    })
-    getInfo().then(res =>{
-      createBy.value = res.user.createBy
-      userId.value = res.user.userId
-    })
-  }else {
-    console.log("resourceId=else")
-    openSelect1.value = false
-    console.log(openSelect1.value)
-    openAdd.value = true
-    console.log(openAdd.value)
-    getResource(editResourceId.value)
-  }
+  // if (editResourceId.value==0){
+  //   console.log("resourceId=0")
+  //   id.value =  toCourseId.getCourseId();
+  //   formState.courseId = id.value
+  //   getDicts(classShareProtoco).then(res =>{
+  //     classShareProtocoList.value = res;
+  //   })
+  //   getDicts(classProcess).then(res =>{
+  //     classProcessList.value = res;
+  //   })
+  //   getDicts(classType).then(res =>{
+  //     classTypeList.value = res;
+  //   })
+  //   getInfo().then(res =>{
+  //     createBy.value = res.user.createBy
+  //     userId.value = res.user.userId
+  //   })
+  // }else {
+  //   console.log("resourceId=else")
+  //   openSelect1.value = false
+  //   console.log(openSelect1.value)
+  //   openEdit.value = true
+  //   console.log(openEdit.value)
+  //   getResource(editResourceId.value)
+  // }
+  console.log(openEdit.value)
+  console.log(editResourceId.value)
+  getDicts(classShareProtoco).then(res =>{
+    classShareProtocoList.value = res;
+  })
+  getDicts(classProcess).then(res =>{
+    classProcessList.value = res;
+  })
+  getDicts(classType).then(res =>{
+    classTypeList.value = res;
+  })
+  getInfo().then(res =>{
+        createBy.value = res.user.createBy
+        userId.value = res.user.userId
+      })
+  getResource(editResourceId.value)
 })
 
 const handleSelect = () =>{
@@ -315,33 +334,41 @@ const handleTitleInput = () => {
   }else showTitleError.value = false
 }
 
-//确认添加资料
-const handleAddResource = () =>{
-  formState.type = typeList.value.join('');
-  formState.process = processList.value.join(',');
-  openAdd.value = false;
-  addResourceInfo(formState).then((res) =>{
+//确认修改资料
+const handleEditResource = () =>{
+  openEdit.value = false;
+  editResource(formState).then((res) =>{
     ElMessage.success(res)
     location.reload();
-    emit("updateOpenAdd", openSelect1.value)
+    emit("updateOpenEdit", openSelect1.value)
   })
 }
-//取消添加资料
+//取消修改资料
 const cancelAddResource = () => {
   clearFrom()
-  openSelect1.value = false
-  emit("updateOpenAdd", openSelect1.value)
+  openEdit.value = false
+  emit("updateOpenEdit", openEdit.value)
 }
 
 /********************************************************编辑资料********/
 const getResource = (resourceId) =>{
   getOneResource(resourceId).then((res) => {
     console.log(res)
-    // formState.title = res.title
     formState.title = res.title
+    formState.path = res.path
     formState.typeLabel = res.typeLabel
     formState.shareProtocol = res.shareProtocol
-    console.log(formState.title)
+    formState.process = res.process
+    formState.chapterId = res.chapterId
+    formState.type = res.type
+    formState.publishDate = res.publishDate
+    formState.deadline = res.deadline
+    formState.totalScore = res.totalScore
+    formState.resourceId = res.resourceId
+    formState.userId = res.userId
+    formState.createBy = res.createBy
+    formState.createTime = res.createTime
+    formState.updateBy = createBy.value
     // console.log(formState.value)
   })
 }

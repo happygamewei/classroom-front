@@ -7,7 +7,7 @@
       <div class="Resource_top-right">
 <!--        <el-button type="success" size="large" @click="selectTest()">选择文件或者链接</el-button>-->
         <el-button type="success" @click="CreateResource()">创建资料</el-button>
-        <el-button type="success"  size="large" @click="selectFileOrLink()" round style="width: 17vh; height: 5vh;"><PlusOutlined />&nbsp; 添加资料</el-button>
+<!--        <el-button type="success"  size="large" @click="selectFileOrLink()" round style="width: 17vh; height: 5vh;"><PlusOutlined />&nbsp; 添加资料</el-button>-->
 <!--        <el-button @click="addtest" style="width: 17vh; height: 5vh;" class="a" type="success" round><PlusOutlined />添加测试</el-button>-->
       </div>
     </div>
@@ -232,7 +232,7 @@
 
                     <div style="float: right; margin: 3vh 0vh 0vh 6vh;cursor: pointer;" v-if="item.publishDate==null">
                       <div class="control-item">
-                        <button type="button">
+                        <button type="button" @click="publishResource(item.resourceId)">
                           <span>
                             <i class="item-icon">
                               <SendOutlined />
@@ -261,7 +261,8 @@
         </a-list>
       </a-card>
     </div>
-    <AddOrEditResource v-if="openSelect1" :openCreate="openSelect1" @updateOpenAdd="updateOpen"/>
+    <AddOrEditResource v-if="openSelect1" :openCreate="openSelect1"  @updateOpenAdd="updateOpen"/>
+    <EditResource v-if="openEdit1" :openEdit="openEdit1" :openEditId="editResourceId" :openPublish="openPublish1" @updateOpenEdit="EditOpen"/>
   </div>
 
 </template>
@@ -285,6 +286,7 @@ import {getInfo} from "../../../api/login.js"
 import {ElMessage} from "element-plus";
 import {Modal, notification, NotificationPlacement} from "ant-design-vue";
 import AddOrEditResource from "@/components/resource/AddOrEditResource.vue";
+import EditResource from "../../../components/resource/EditResource.vue";
 
 const toCourseId = userCourseId()
 const id = ref()
@@ -518,10 +520,18 @@ const deleteResource = (id,placement: NotificationPlacement) =>{
   });
 }
 // 编辑资料
-const editResource = (reSourceId) =>{
-
+const editResource = (editId) =>{
+  editResourceId.value = editId
+  console.log(editResourceId.value)
+  openEdit1.value = true
 }
 
+//发布资料
+const openPublish1 = ref(false)
+const publishResource = (id) =>{
+  openPublish1.value = true
+  editResource(id)
+}
 //工具函数
   //判断时间
 const isCurrentTimeAfterBackendTime = (deadline) =>{
@@ -547,9 +557,14 @@ const isCurrentTimeAfterBackendTime = (deadline) =>{
 
 //测试
 const openSelect1 = ref(false);
+const openEdit1 = ref(false)
+const editResourceId = ref(0);
 // 更新子组件创建课程openAdd
 const updateOpen = (value) => {
   openSelect1.value = value
+}
+const EditOpen = (value) => {
+  openEdit1.value = value
 }
 const CreateResource = () => {
   openSelect1.value = true;

@@ -37,7 +37,20 @@
       <a><pie-chart-outlined /> 统计</a>
     </span>
   </div>
-  <a-button class="btn3" type="primary" @click="handleAdd">+添加话题</a-button>
+  <a-button
+    v-if="userRole == 'admin'"
+    class="btn3"
+    type="primary"
+    @click="handleAdd"
+    >+添加话题</a-button
+  >
+  <a-button
+    v-if="userRole == 'common'"
+    class="btn4"
+    type="primary"
+    @click="handleAdd"
+    >+添加话题</a-button
+  >
 </template>
 
 <script>
@@ -149,5 +162,9 @@ export default {
 .btn3 {
   margin-left: 105vh;
   bottom: 4vh;
+}
+.btn4 {
+  margin-left: 105vh;
+  bottom: 1vh;
 }
 </style>
