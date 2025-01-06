@@ -2,7 +2,6 @@
   <div>
     <TopicsComponent1></TopicsComponent1>
     <TopicsComponent4></TopicsComponent4>
-
     <TopicsComponent2 :key="key"></TopicsComponent2>
   </div>
 </template>
