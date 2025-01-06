@@ -244,6 +244,7 @@ export default {
 .reply {
   font-size: x-small;
   margin-top: 2vh;
+
   margin-left: -130vh;
 }
 .content {
