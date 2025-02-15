@@ -4,7 +4,7 @@
       <div class="Resource_top-left">
           共{{num}}个活动
       </div>
-      <div class="Resource_top-right">
+      <div class="Resource_top-right" v-if="!isStudent">
 <!--        <el-button type="success" size="large" @click="selectTest()">选择文件或者链接</el-button>-->
         <el-button type="success" @click="CreateResource()">创建资料</el-button>
 <!--        <el-button type="success"  size="large" @click="selectFileOrLink()" round style="width: 17vh; height: 5vh;"><PlusOutlined />&nbsp; 添加资料</el-button>-->
@@ -194,7 +194,7 @@
                       <p style="display: inline-block;">{{ item.process }}</p>
                     </div>
                   </div>
-                  <div  style="margin-left: 75vh; margin-top: -15vh; width: 75vh; height: 15vh; display: inline-block; position: absolute;">
+                  <div  style="margin-left: 75vh; margin-top: -15vh; width: 75vh; height: 15vh; display: inline-block; position: absolute;" v-if="!isStudent">
                     <div class="ant-dropdown-link" @click.prevent  style="float: right;margin-top: 1.25vh;cursor: pointer;">
 
                       <a-dropdown>
@@ -287,6 +287,8 @@ import {ElMessage} from "element-plus";
 import {Modal, notification, NotificationPlacement} from "ant-design-vue";
 import AddOrEditResource from "@/components/resource/AddOrEditResource.vue";
 import EditResource from "../../../components/resource/EditResource.vue";
+import {getRoles} from "@/utils/user-utils.js";
+import {ADMIN, COMMON} from "@/config/setting.js";
 
 const toCourseId = userCourseId()
 const id = ref()
@@ -294,7 +296,14 @@ const createBy = ref();
 const currentDate = new Date();
 const formattedTime = currentDate.toLocaleString(); //获取当前时间
 const num = ref(0) //获取资料的数量
+const isStudent = ref(true)
 onMounted(()=>{
+  const roles = getRoles()
+  if(roles.includes(ADMIN)){
+    isStudent.value = false
+  }else if (roles.includes(COMMON)){
+    isStudent.value = true
+  }
   id.value =  toCourseId.getCourseId();
   formState.courseId = id.value
   getDicts(classShareProtoco).then(res =>{

@@ -129,7 +129,7 @@
         <template style="list-style: none;display:inline" v-for="(item,index) in noticeList" :key="item?.noticeId">
           <div class="announce-cont-box" style="padding-top: 1vh">
 
-            <div class="ant-dropdown-link" @click.prevent  style="float: right;margin-top: 1.25vh;cursor: pointer;">
+            <div class="ant-dropdown-link" @click.prevent  style="float: right;margin-top: 1.25vh;cursor: pointer;" v-if="user.admin" >
 
               <a-dropdown>
                 <a style="color: black;">
